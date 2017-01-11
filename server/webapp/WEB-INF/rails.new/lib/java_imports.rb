@@ -268,4 +268,5 @@ module JavaImports
   java_import com.thoughtworks.go.plugin.access.elastic.ElasticAgentExtension unless defined? ElasticAgentExtension
   java_import com.thoughtworks.go.plugin.access.elastic.ElasticAgentMetadataStore unless defined? ElasticAgentMetadataStore
   java_import com.thoughtworks.go.server.service.result.BulkDeletionFailureResult unless defined? BulkDeletionFailureResult
+  java_import com.thoughtworks.go.server.dashboard.GoDashboardPipelines unless defined? GoDashboardPipelines
 end
