@@ -31,9 +31,11 @@ describe ApiV2::Dashboard::PipelineGroupsRepresenter do
     expect(actual_json).to have_links(:self, :doc)
     expect(actual_json).to have_link(:self).with_url('http://test.host/api/dashboard')
     expect(actual_json).to have_link(:doc).with_url('https://api.go.cd/current/#dashboard')
-    actual_json.fetch(:_embedded)[:pipeline_groups].should ==
-        [expected_embedded_pipeline_groups({:name => 'group1', :pipelines => [pipeline1_in_group1, pipeline2_in_group1]}),
-         expected_embedded_pipeline_groups({:name => 'group2', :pipelines => [pipeline3_in_group2]})]
+    expect(actual_json.fetch(:_embedded)[:pipeline_groups]).to eq(
+                                                                 [expected_embedded_pipeline_groups({:name => 'group1', :pipelines => [pipeline1_in_group1, pipeline2_in_group1]}),
+                                                                  expected_embedded_pipeline_groups({:name => 'group2', :pipelines => [pipeline3_in_group2]})]
+                                                               )
+
   end
 
   private

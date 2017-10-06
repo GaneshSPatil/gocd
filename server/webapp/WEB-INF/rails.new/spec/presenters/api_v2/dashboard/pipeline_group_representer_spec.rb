@@ -32,8 +32,8 @@ describe ApiV2::Dashboard::PipelineGroupRepresenter do
     expect(actual_json).to have_link(:self).with_url('http://test.host/api/config/pipeline_groups')
     expect(actual_json).to have_link(:doc).with_url('https://api.go.cd/current/#pipeline-groups')
     actual_json.delete(:_links)
-    actual_json.delete(:_embedded)[:pipelines].should == [expected_embedded_pipeline(pipeline1.model()),
-                                                          expected_embedded_pipeline(pipeline2.model())]
+    expect(actual_json.delete(:_embedded)[:pipelines]).to eq([expected_embedded_pipeline(pipeline1),
+                                                          expected_embedded_pipeline(pipeline2)])
     expect(actual_json).to eq({name: 'group1'})
   end
 
