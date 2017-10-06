@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class TimeStampBasedCounter implements Counter {
-    private final Long seed;
+    private final long seed;
     private static long counter = 0;
 
     @Autowired

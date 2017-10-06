@@ -18,10 +18,17 @@ module ApiV2
 
     include ApplicationHelper
 
+    before_filter :check_timestamp_format, :only => [:dashboard]
+
     def dashboard
       name_of_current_user = CaseInsensitiveString.str(current_user.getUsername())
       all_pipelines_for_dashboard = go_dashboard_service.allPipelinesForDashboard()
-      if stale?(etag: all_pipelines_for_dashboard.lastUpdatedTimeStamp())
+      timestamp_from_request = request.headers["If-Go-Dashboard-Modified-Since"].to_i
+      response.headers['Go-Dashboard-Last-Modified'] = all_pipelines_for_dashboard.lastUpdatedTimeStamp().to_s
+
+      if (timestamp_from_request >= all_pipelines_for_dashboard.lastUpdatedTimeStamp())
+        render DEFAULT_FORMAT => {}, status: 304 if (timestamp_from_request >= all_pipelines_for_dashboard.lastUpdatedTimeStamp())
+      else
         pipelines_across_groups = all_pipelines_for_dashboard.orderedEntries()
         pipeline_selections = pipeline_selections_service.getSelectedPipelines(cookies[:selected_pipelines], current_user_entity_id)
         pipelines_viewable_by_user = pipelines_across_groups.select do |pipeline|
@@ -34,6 +41,12 @@ module ApiV2
 
         render DEFAULT_FORMAT => presenters_to_hash, status: status
       end
+    end
+
+    private
+    def check_timestamp_format
+      timestamp_from_request = request.headers["If-Go-Dashboard-Modified-Since"].to_s
+      render_message("Please provide a numeric value for header 'If-Go-Dashboard-Modified-Since'", :precondition_failed) if !timestamp_from_request.blank? && timestamp_from_request.match("^[0-9]+$").nil?
     end
   end
 end

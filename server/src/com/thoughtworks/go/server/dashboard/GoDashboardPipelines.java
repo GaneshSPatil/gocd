@@ -17,24 +17,21 @@
 package com.thoughtworks.go.server.dashboard;
 
 import java.util.List;
-import java.util.UUID;
 
 public class GoDashboardPipelines {
     private List<GoDashboardPipeline> orderedEntries;
-//    private long lastUpdatedTimeStamp;
-    private String lastUpdatedTimeStamp;
+    private long lastUpdatedTimeStamp;
 
     public GoDashboardPipelines(List<GoDashboardPipeline> orderedEntries, TimeStampBasedCounter timeStampBasedCounter) {
         this.orderedEntries = orderedEntries;
-//        this.lastUpdatedTimeStamp = timeStampBasedCounter.getNext();
-        this.lastUpdatedTimeStamp = UUID.randomUUID().toString();
+        this.lastUpdatedTimeStamp = timeStampBasedCounter.getNext();
     }
 
     public List<GoDashboardPipeline> orderedEntries() {
         return orderedEntries;
     }
 
-    public String lastUpdatedTimeStamp() {
+    public long lastUpdatedTimeStamp() {
         return lastUpdatedTimeStamp;
     }
 }
