@@ -132,6 +132,11 @@ public class GoConfigService implements Initializer, CruiseConfigProvider {
         }
     }
 
+    @Override
+    public void startDaemon() {
+
+    }
+
     public ConfigForEdit<PipelineConfig> loadForEdit(String pipelineName, Username username, HttpLocalizedOperationResult result) {
         if (!canEditPipeline(pipelineName, username, result)) {
             return null;
