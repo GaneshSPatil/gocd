@@ -22,6 +22,8 @@ import com.thoughtworks.go.config.security.users.Everyone;
 import com.thoughtworks.go.presentation.pipelinehistory.PipelineModel;
 import org.junit.Test;
 
+import java.util.Collections;
+
 import static com.thoughtworks.go.domain.PipelinePauseInfo.notPaused;
 import static com.thoughtworks.go.util.DataStructureUtils.s;
 import static org.hamcrest.core.Is.is;
@@ -33,9 +35,9 @@ public class GoDashboardPipelineTest {
     @Test
     public void shouldKnowWhetherAUserCanViewIt() throws Exception {
         Permissions permissions = new Permissions(
-                new AllowedUsers(s("viewer1", "viewer2")),
+                new AllowedUsers(s("viewer1", "viewer2"), Collections.emptySet()),
                 Everyone.INSTANCE,
-                new AllowedUsers(s("admin", "root")),
+                new AllowedUsers(s("admin", "root"), Collections.emptySet()),
                 Everyone.INSTANCE);
 
         GoDashboardPipeline pipeline = new GoDashboardPipeline(new PipelineModel("pipeline1", false, false, notPaused()), permissions, "group1", mock(TimeStampBasedCounter.class));
