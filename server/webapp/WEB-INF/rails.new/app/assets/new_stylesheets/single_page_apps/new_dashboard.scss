@@ -20,3 +20,32 @@
 @import 'shared/modal';
 @import 'shared/header';
 @import 'shared/alert';
+@import 'pipeline_configs/accordion';
+
+$elastic-profile-plugin-icon-size: 30px;
+$elastic-profile-icon-text-padding: 20px;
+$elastic-profile-icon-color: #555;
+$elastic-profile-icon-hover-color: #000;
+
+.dashboard {
+  margin-top:       60px;
+  background-color: $accordion-bg;
+  overflow:         auto;
+}
+
+.edit-pipeline {
+  @include icon-before($type: gear, $color: $elastic-profile-icon-color);
+  &:not(.disabled) {
+    &:hover {
+      &:before {
+        color: $elastic-profile-icon-hover-color;
+      }
+    }
+  }
+
+  &.disabled {
+    &:before {
+      color: $dark-gray;
+    }
+  }
+}

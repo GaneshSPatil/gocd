@@ -14,26 +14,23 @@
  * limitations under the License.
  */
 
-const $               = require('jquery');
-const m               = require('mithril');
-const Stream          = require('mithril/stream');
-const Dashboard       = require('models/dashboard/dashboard');
-const DashboardWidget = require('views/dashboard/dashboard_widget');
+const m = require('mithril');
+const _ = require('lodash');
+const f = require('helpers/form_helper');
 
-require('foundation-sites');
+const StagesInstanceWidget = {
+  view: (vnode) => {
+    const stages        = vnode.attrs.stages();
+    const stageInstance = _.map(stages, (stage) => {
+      return (<span class="stage-instance">{stage.status()}</span>);
+    });
 
-$(() => {
-  $(document).foundation();
+    return (
+      <f.column class="stages-instance" size="4">
+        {stageInstance}
+      </f.column>
+    );
+  }
+};
 
-  const onSuccess = (dashboard) => {
-    const component = {
-      view() {
-        return m(DashboardWidget, {dashboard: Stream(dashboard)});
-      }
-    };
-
-    m.mount($("#dashboard").get(0), component);
-  };
-
-  Dashboard.get().then(onSuccess);
-});
+module.exports = StagesInstanceWidget;
