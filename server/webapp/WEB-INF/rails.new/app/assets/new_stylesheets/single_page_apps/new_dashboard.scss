@@ -107,7 +107,7 @@ $settings-icon-hover-color: #000;
   @extend %pipeline-label-text;
 }
 
-.instance-details {
+.instance-details, .latest-stage {
   @extend %pipeline-label-text;
   font-weight: 300;
 }

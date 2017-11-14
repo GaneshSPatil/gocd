@@ -34,7 +34,9 @@ const PipelineInstanceWidget = {
           <div>Triggered by {instance.triggeredBy()}</div>
           <div>on {instance.scheduledAt().toString()}</div>
         </div>
-
+        <div class="latest-stage">
+          {instance.latestStageInfo()}
+        </div>
         <StagesInstanceWidget stages={instance.stages}/>
       </div>
     );

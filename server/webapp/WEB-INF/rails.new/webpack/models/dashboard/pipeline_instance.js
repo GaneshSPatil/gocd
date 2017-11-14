@@ -18,8 +18,9 @@ const _      = require('lodash');
 const Stream = require('mithril/stream');
 
 const StageInstance = function (json) {
-  this.name   = Stream(json.name);
-  this.status = Stream(json.status);
+  this.name       = Stream(json.name);
+  this.status     = Stream(json.status);
+  this.isBuilding = () => json.status === 'Building';
 };
 
 const PipelineInstance = function (info) {
@@ -31,6 +32,19 @@ const PipelineInstance = function (info) {
   this.comparePath = Stream(info._links.compare_url.href);
 
   this.stages = Stream(_.map(info._embedded.stages, (stage) => new StageInstance(stage)));
+
+  this.latestStageInfo = () => {
+    const stages = this.stages();
+
+    for (let i = 0; i < stages.length; i++) {
+      if (stages[i].isBuilding()) {
+        return `${stages[i].status()}: ${stages[i].name()}`;
+      }
+    }
+
+    const lastStage = stages[stages.length - 1];
+    return `${lastStage.status()}: ${lastStage.name()}`;
+  };
 };
 
 module.exports = PipelineInstance;

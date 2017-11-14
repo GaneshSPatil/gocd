@@ -113,6 +113,10 @@ describe("Dashboard Pipeline Instance Widget", () => {
     expect(compareLink.href).toEqual(pipelineInstanceJson._links.vsm_url.href);
   });
 
+  it("should render the latest stage", () => {
+    expect($root.find('.latest-stage')).toContainText('Failed: up42_stage');
+  });
+
   it("should render stages instance", () => {
     expect($root.find('.stages-instance')).toBeInDOM();
   });
