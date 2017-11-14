@@ -14,7 +14,7 @@
 # limitations under the License.
 ##########################################################################
 
-require 'spec_helper'
+require 'rails_helper'
 
 describe ApiV2::Dashboard::PipelineInstanceRepresenter do
   include PipelineModelMother
@@ -42,7 +42,7 @@ describe ApiV2::Dashboard::PipelineInstanceRepresenter do
     actual_json = presenter.to_hash(url_builder: UrlBuilder.new)
     actual_json.delete(:_links)
     actual_json.delete(:_embedded)
-    expect(actual_json).to eq({:label => "g1", :schedule_at => date, :triggered_by => "Anonymous"})
+    expect(actual_json).to eq({:label => "g1", :scheduled_at => date, :triggered_by => "Anonymous"})
   end
 
 end

@@ -18,28 +18,14 @@ module ApiV2
 
     include ApplicationHelper
 
-    before_filter :check_timestamp_format, :only => [:dashboard]
-
     def dashboard
-      name_of_current_user = CaseInsensitiveString.str(current_user.getUsername())
-      all_pipelines_for_dashboard = go_dashboard_service.allPipelinesForDashboard()
-      timestamp_from_request = request.headers["If-Go-Dashboard-Modified-Since"].to_i
-      response.headers['Go-Dashboard-Last-Modified'] = all_pipelines_for_dashboard.lastUpdatedTimeStamp().to_s
+      pipeline_selections = pipeline_selections_service.getSelectedPipelines(cookies[:selected_pipelines], current_user_entity_id)
+      all_pipelines_groups_for_dashboard = go_dashboard_service.allPipelineGroupsForDashboard(pipeline_selections, current_user)
 
-      if (timestamp_from_request >= all_pipelines_for_dashboard.lastUpdatedTimeStamp())
-        render DEFAULT_FORMAT => {}, status: 304 if (timestamp_from_request >= all_pipelines_for_dashboard.lastUpdatedTimeStamp())
-      else
-        pipelines_across_groups = all_pipelines_for_dashboard.orderedEntries()
-        pipeline_selections = pipeline_selections_service.getSelectedPipelines(cookies[:selected_pipelines], current_user_entity_id)
-        pipelines_viewable_by_user = pipelines_across_groups.select do |pipeline|
-          does_user_have_view_permissions = pipeline.canBeViewedBy(name_of_current_user)
-          has_user_selected_the_pipeline_for_display = pipeline_selections.includesPipeline(pipeline.name())
-          does_user_have_view_permissions && has_user_selected_the_pipeline_for_display
-        end
-        presenters = Dashboard::PipelineGroupsRepresenter.new(pipelines_viewable_by_user)
-        presenters_to_hash = presenters.to_hash(url_builder: self)
+      presenters = Dashboard::PipelineGroupsRepresenter.new({pipeline_groups: all_pipelines_groups_for_dashboard, user: current_user})
+      presenters_to_hash = presenters.to_hash(url_builder: self)
 
-        render DEFAULT_FORMAT => presenters_to_hash, status: status
+      render DEFAULT_FORMAT => presenters_to_hash, status: status
       end
     end
 
@@ -49,4 +35,3 @@ module ApiV2
       render_message("Please provide a numeric value for header 'If-Go-Dashboard-Modified-Since'", :precondition_failed) if !timestamp_from_request.blank? && timestamp_from_request.match("^[0-9]+$").nil?
     end
   end
-end

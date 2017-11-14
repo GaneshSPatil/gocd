@@ -14,16 +14,17 @@
 # limitations under the License.
 ##########################################################################
 
-require 'spec_helper'
+require 'rails_helper'
 
 describe ApiV2::Dashboard::PipelineRepresenter do
   include PipelineModelMother
 
-  it 'renders all pipeline groups with hal representation' do
+  it 'renders pipeline with hal representation' do
     counter = double('Counter')
     counter.stub(:getNext).and_return(1)
-    pipeline    = GoDashboardPipeline.new(pipeline_model('pipeline_name', 'pipeline_label'), nil, "grp", counter)
-    presenter   = ApiV2::Dashboard::PipelineRepresenter.new(pipeline)
+    permissions = Permissions.new(NoOne.INSTANCE, NoOne.INSTANCE, NoOne.INSTANCE, NoOne.INSTANCE)
+    pipeline    = GoDashboardPipeline.new(pipeline_model('pipeline_name', 'pipeline_label'), permissions, "grp", counter)
+    presenter   = ApiV2::Dashboard::PipelineRepresenter.new({pipeline: pipeline, user: Username.new(CaseInsensitiveString.new(SecureRandom.hex))})
     actual_json = presenter.to_hash(url_builder: UrlBuilder.new)
 
     expect(actual_json).to have_links(:self, :doc, :settings_path, :trigger, :trigger_with_options, :unpause, :pause)
@@ -38,6 +39,48 @@ describe ApiV2::Dashboard::PipelineRepresenter do
     expect(actual_json.delete(:_embedded)).to  eq({:instances => [expected_embedded_pipeline(presenter.instances.first)]})
     expect(actual_json).to eq(pipelines_hash)
   end
+
+  describe 'authorization' do
+    it 'user can operate a pipeline if user is pipeline_level operator' do
+      counter = double('Counter')
+      counter.stub(:getNext).and_return(1)
+      permissions = Permissions.new(NoOne.INSTANCE, NoOne.INSTANCE, NoOne.INSTANCE, Everyone.INSTANCE)
+      pipeline    = GoDashboardPipeline.new(pipeline_model('pipeline_name', 'pipeline_label'), permissions, "grp", counter)
+      presenter   = ApiV2::Dashboard::PipelineRepresenter.new({pipeline: pipeline, user: Username.new(CaseInsensitiveString.new(SecureRandom.hex))})
+      actual_json = presenter.to_hash(url_builder: UrlBuilder.new)
+
+      actual_json.delete(:_links)
+      actual_json.delete(:_embedded)
+      expect(actual_json).to eq(pipelines_hash.merge!(can_operate: true))
+    end
+
+    it 'user can administer a pipeline if user is admin of pipeline' do
+      counter = double('Counter')
+      counter.stub(:getNext).and_return(1)
+      permissions = Permissions.new(NoOne.INSTANCE, NoOne.INSTANCE, Everyone.INSTANCE, NoOne.INSTANCE)
+      pipeline    = GoDashboardPipeline.new(pipeline_model('pipeline_name', 'pipeline_label'), permissions, "grp", counter)
+      presenter   = ApiV2::Dashboard::PipelineRepresenter.new({pipeline: pipeline, user: Username.new(CaseInsensitiveString.new(SecureRandom.hex))})
+      actual_json = presenter.to_hash(url_builder: UrlBuilder.new)
+
+      actual_json.delete(:_links)
+      actual_json.delete(:_embedded)
+      expect(actual_json).to eq(pipelines_hash.merge!(can_administer: true))
+    end
+
+    it 'user can unlock and pause a pipeline if user is operator of pipeline' do
+      counter = double('Counter')
+      counter.stub(:getNext).and_return(1)
+      permissions = Permissions.new(NoOne.INSTANCE, Everyone.INSTANCE, NoOne.INSTANCE, NoOne.INSTANCE)
+      pipeline    = GoDashboardPipeline.new(pipeline_model('pipeline_name', 'pipeline_label'), permissions, "grp", counter)
+      presenter   = ApiV2::Dashboard::PipelineRepresenter.new({pipeline: pipeline, user: Username.new(CaseInsensitiveString.new(SecureRandom.hex))})
+      actual_json = presenter.to_hash(url_builder: UrlBuilder.new)
+
+      actual_json.delete(:_links)
+      actual_json.delete(:_embedded)
+      expect(actual_json).to eq(pipelines_hash.merge!(can_pause: true, can_unlock: true))
+    end
+  end
+
 
   private
 
@@ -54,7 +97,11 @@ describe ApiV2::Dashboard::PipelineRepresenter do
         paused:    false,
         paused_by:    nil,
         pause_reason: nil
-      }
+      },
+      can_operate: false,
+      can_administer: false,
+      can_unlock: false,
+      can_pause: false
     }
   end
 
