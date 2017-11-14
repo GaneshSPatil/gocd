@@ -104,7 +104,7 @@ describe("Dashboard Stages Instance Widget", () => {
   it("should render each stage instance", () => {
     const stagesInstance = $root.find('.stage-instance');
 
-    expect(stagesInstance.get(0)).toContainText('Failed');
-    expect(stagesInstance.get(1)).toContainText('Building');
+    expect(stagesInstance.get(0)).toHaveClass('failed');
+    expect(stagesInstance.get(1)).toHaveClass('building');
   });
 });

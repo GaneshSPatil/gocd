@@ -25,7 +25,7 @@ const DashboardWidget = {
   oninit(vnode) {
     ComponentMixins.HasViewModel.call(this);
 
-    this.getPipelinesGroupView = (pipelineGroup, index) => {
+    this.getPipelinesGroupView = (pipelineGroup, _index) => {
       const pipelines = _.map(pipelineGroup.pipelines(), (pipelineName) => {
         return (
           <PipelineWidget pipeline={Stream(vnode.attrs.dashboard().findPipeline(pipelineName))}/>
@@ -33,16 +33,14 @@ const DashboardWidget = {
       });
 
       return (
-        <f.row>
-          <f.accordion accordionTitles={[(<span>{pipelineGroup.name()}</span>)]}
-                       selectedIndex={vnode.state.vmState(`pipelineGroupSelected${  index}`, Stream(0))}
-                       accordionKeys={['pipeline-groups']}
-                       class='pipeline-group'>
+        <div class="pipeline-group-wrapper">
+          <div class="pipeline-group">
+            <h2 class="pipeline-group-title"> {pipelineGroup.name()}</h2>
             <div>
               {pipelines}
             </div>
-          </f.accordion>
-        </f.row>
+          </div>
+        </div>
       );
     };
   },
@@ -55,11 +53,7 @@ const DashboardWidget = {
       <div>
         <div class="header-panel">
           <header class="page-header">
-            <f.row>
-              <f.column size={6}>
-                <h1>Pipelines</h1>
-              </f.column>
-            </f.row>
+            <f.row>Pipelines</f.row>
           </header>
         </div>
         <div class="dashboard">

@@ -133,18 +133,6 @@ describe("Dashboard Pipeline Widget", () => {
     expect($root.find('.edit-pipeline')).toBeInDOM();
   });
 
-  it("should render pipeline trigger option", () => {
-    expect($root.find('.trigger-pipeline').get(0)).toBeInDOM();
-  });
-
-  it("should render history path", () => {
-    const pipelineHistory = $root.find('.pipeline-history').get(0);
-
-    expect(pipelineHistory).toBeInDOM();
-    expect(pipelineHistory).toContainText('History');
-    expect(pipelineHistory.href).toEqual(pipeline().historyPath());
-  });
-
   it("should render pipeline instances", () => {
     expect($root.find('.pipeline-instance')).toBeInDOM();
   });

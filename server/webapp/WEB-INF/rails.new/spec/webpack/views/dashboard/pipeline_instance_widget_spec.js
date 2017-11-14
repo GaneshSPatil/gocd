@@ -92,8 +92,9 @@ describe("Dashboard Pipeline Instance Widget", () => {
     expect($root.find('.instance-label')).toContainText('Instance: 1');
   });
 
-  it("should render triggered on information", () => {
-    expect($root.find('.instance-label')).toContainText(`Triggered on ${  new Date(pipelineInstanceJson.schedule_at).toString()}`);
+  it("should render triggered by information", () => {
+    expect($root.find('.instance-details')).toContainText(`Triggered by ${  pipelineInstanceJson.triggered_by }`);
+    expect($root.find('.instance-details')).toContainText(`on ${  new Date(pipelineInstanceJson.schedule_at).toString()}`);
   });
 
   it("should render compare link", () => {

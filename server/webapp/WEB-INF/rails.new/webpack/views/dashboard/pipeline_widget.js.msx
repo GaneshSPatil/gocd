@@ -16,10 +16,24 @@
 
 const m      = require('mithril');
 const _      = require('lodash');
-const f      = require('helpers/form_helper');
 const Stream = require('mithril/stream');
 
 const PipelineInstanceWidget = require('views/dashboard/pipeline_instance_widget');
+
+const PipelineHeaderWidget = {
+  view:(vnode) => {
+    const pipeline          = vnode.attrs.pipeline();
+    return (
+      <div class="pipeline-header">
+        <div class="pipeline-actions">
+          <a class='edit-pipeline' href={pipeline.settingsPath()}/>
+        </div>
+        <div class="pipeline-name"> {pipeline.name()} </div>
+      </div>
+    );
+  }
+};
+
 
 const PipelineWidget = {
   oninit(vnode) {
@@ -36,17 +50,7 @@ const PipelineWidget = {
 
     return (
       <div class="pipeline">
-        <f.row class="pipeline-header">
-          <f.column class="pipeline-name" size={2}> {pipeline.name()} </f.column>
-          <f.column size={4}>
-            <f.link class='trigger-pipeline' onclick={pipeline.trigger}> trigger</f.link>
-          </f.column>
-          <f.column size={2}><a class="pipeline-history" href={pipeline.historyPath()}> History </a></f.column>
-          <f.column size={1}>
-            <f.link class='edit-pipeline' href={pipeline.settingsPath()}/>
-          </f.column>
-
-        </f.row>
+        <PipelineHeaderWidget pipeline={vnode.attrs.pipeline} />
         {pipelineInstances}
       </div>
     );

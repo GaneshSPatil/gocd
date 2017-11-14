@@ -16,19 +16,18 @@
 
 const m = require('mithril');
 const _ = require('lodash');
-const f = require('helpers/form_helper');
 
 const StagesInstanceWidget = {
   view: (vnode) => {
     const stages        = vnode.attrs.stages();
     const stageInstance = _.map(stages, (stage) => {
-      return (<span class="stage-instance">{stage.status()}</span>);
+      return (<span class={`stage-instance ${  stage.status().toLowerCase() }`}/>);
     });
 
     return (
-      <f.column class="stages-instance" size="4">
+      <div class="stages-instance" size="4">
         {stageInstance}
-      </f.column>
+      </div>
     );
   }
 };
