@@ -50,7 +50,6 @@ Dashboard.get = () => {
     const jqXHR = $.ajax({
       method:     'GET',
       url:        Routes.apiv2ShowDashboardPath(),
-      timeout:    mrequest.timeout,
       beforeSend: config
     });
 
