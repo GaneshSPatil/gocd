@@ -102,10 +102,12 @@ private
     end
 
     def prepare(represented)
+      p represented
+      p self
+      p self.methods
       represented.extend(self)
     end
   end
-
 
   module Feature
     def feature(*mods)

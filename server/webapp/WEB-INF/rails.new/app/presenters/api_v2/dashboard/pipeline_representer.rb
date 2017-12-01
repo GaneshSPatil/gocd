@@ -16,94 +16,87 @@
 
 module ApiV2
   module Dashboard
-    class PipelineRepresenter < ApiV2::BaseRepresenter
+    class PipelineRepresenter < ApiV2::MyBaseRepresenter
       def initialize(options)
-        @pipeline = options[:pipeline]
-        @user = options[:user]
+        @options = options
 
-        super(@pipeline)
+        @pipeline = options[:represented][:pipeline]
+        @user = options[:represented][:user]
+        @url_builder = options[:represented][:url_builder]
+
+        super(options)
       end
 
-      link :self do |opts|
-        opts[:url_builder].pipeline_history_url(@pipeline.name())
+      link :self do
+        @url_builder.pipeline_history_url(@pipeline.name())
       end
 
       link :doc do
         'https://api.go.cd/current/#pipelines'
       end
 
-      link :settings_path do |opts|
-        opts[:url_builder].pipeline_edit_url(@pipeline.name(), current_tab: :'general')
+      link :settings_path do
+        @url_builder.pipeline_edit_url(@pipeline.name(), current_tab: :'general')
       end
 
-      link :trigger do |opts|
-        opts[:url_builder].api_pipeline_action_url(@pipeline.name(), action: :'schedule')
+      link :trigger do
+        @url_builder.api_pipeline_action_url(@pipeline.name(), action: :'schedule')
       end
 
-      link :trigger_with_options do |opts|
-        opts[:url_builder].api_pipeline_action_url(@pipeline.name(), action: :'schedule')
+      link :trigger_with_options do
+        @url_builder.api_pipeline_action_url(@pipeline.name(), action: :'schedule')
       end
 
-      link :pause do |opts|
-        opts[:url_builder].pause_pipeline_url(@pipeline.name())
+      link :pause do
+        @url_builder.pause_pipeline_url(@pipeline.name())
       end
 
-      link :unpause do |opts|
-        opts[:url_builder].unpause_pipeline_url(@pipeline.name())
+      link :unpause do
+        @url_builder.unpause_pipeline_url(@pipeline.name())
       end
 
-      property :name, exec_context: :decorator
-      property :lastUpdatedTimeStamp, as: :last_updated_timestamp
-      property :locked, exec_context: :decorator
-      property :pause_info, exec_context: :decorator do
-        property :paused, as: :paused
-        property :pauseBy,
-                 as:         :paused_by,
-                 getter:     lambda { |options| pauseBy.blank? ? nil : pauseBy },
-                 render_nil: true
-        property :pauseCause,
-                 as:         :pause_reason,
-                 getter:     lambda { |options| pauseCause.blank? ? nil : pauseCause },
-                 render_nil: true
-      end
-      property :can_operate, exec_context: :decorator
-      property :can_administer, exec_context: :decorator
-      property :can_unlock, exec_context: :decorator
-      property :can_pause, exec_context: :decorator
-      collection :instances, embedded: true, exec_context: :decorator, decorator: PipelineInstanceRepresenter
-
-      def name
+      property :name do
         @pipeline.name().toString()
       end
 
-      def pause_info
-        @pipeline.model().getPausedInfo()
+      property :last_updated_timestamp do
+        @pipeline.getLastUpdatedTimeStamp
       end
 
-      def locked
+      property :locked do
         @pipeline.model().getLatestPipelineInstance().isCurrentlyLocked
       end
 
-      def instances
-        @pipeline.model().getActivePipelineInstances().select do |pipeline_instance_model|
-          !pipeline_instance_model.instance_of?(com.thoughtworks.go.presentation.pipelinehistory.EmptyPipelineInstanceModel)
-        end
+      property :pause_info do
+        paused_info = @pipeline.model().getPausedInfo()
+        {
+          paused: paused_info.paused,
+          paused_by: paused_info.pauseBy.blank? ? nil : paused_info.pauseBy,
+          pause_reason: paused_info.pauseCause.blank? ? nil : paused_info.pauseCause
+        }
       end
 
-      def can_operate
+      property :can_operate do
         @pipeline.isPipelineOperator(@user.getUsername().toString())
       end
 
-      def can_administer
+      property :can_administer do
         @pipeline.canBeAdministeredBy(@user.getUsername().toString())
       end
 
-      def can_unlock
+      property :can_unlock do
         @pipeline.canBeOperatedBy(@user.getUsername().toString())
-        end
+      end
 
-      def can_pause
+      property :can_pause do
         @pipeline.canBeOperatedBy(@user.getUsername().toString())
+      end
+
+      embed :instances do
+        instance_parameters = @pipeline.model().getActivePipelineInstances().select do |pipeline_instance_model|
+          !pipeline_instance_model.instance_of?(com.thoughtworks.go.presentation.pipelinehistory.EmptyPipelineInstanceModel)
+        end
+        instance_parameters.map {|opt| PipelineInstanceRepresenter.new(embed: {stages: true}, represented: {pipeline_instance: opt, url_builder: @url_builder})}
       end
     end
   end

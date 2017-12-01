@@ -17,11 +17,16 @@
 
 module ApiV2
   module Dashboard
-    class PipelineInstanceRepresenter < ApiV2::BaseRepresenter
-      alias_method :pipeline_instance, :represented
+    class PipelineInstanceRepresenter < ApiV2::MyBaseRepresenter
+      def initialize(options)
+        @pipeline_instance = options[:represented][:pipeline_instance]
+        @url_builder = options[:represented][:url_builder]
+
+        super(options)
+      end
 
       link :self do |opts|
-        opts[:url_builder].pipeline_instance_by_counter_api_url(pipeline_instance.getName(), pipeline_instance.getCounter())
+        @url_builder.pipeline_instance_by_counter_api_url(@pipeline_instance.getName(), @pipeline_instance.getCounter())
       end
 
       link :doc do
@@ -29,35 +34,44 @@ module ApiV2
       end
 
       link :history_url do |opts|
-        opts[:url_builder].pipeline_history_url(pipeline_instance.getName())
+        @url_builder.pipeline_history_url(@pipeline_instance.getName())
       end
 
       link :vsm_url do |opts|
-        opts[:url_builder].vsm_show_url(pipeline_instance.getName(), :pipeline_counter => pipeline_instance.getCounter())
+        @url_builder.vsm_show_url(@pipeline_instance.getName(), :pipeline_counter => @pipeline_instance.getCounter())
 
       end
       link :compare_url do |opts|
-        opts[:url_builder].compare_pipelines_url(:from_counter => pipeline_instance.getCounter()-1, :to_counter => pipeline_instance.getCounter(), :pipeline_name => pipeline_instance.getName())
+        @url_builder.compare_pipelines_url(:from_counter => @pipeline_instance.getCounter()-1, :to_counter => @pipeline_instance.getCounter(), :pipeline_name => @pipeline_instance.getName())
       end
 
       link :build_cause_url do |opts|
-        opts[:url_builder].build_cause_url(:pipeline_counter => pipeline_instance.getCounter(), :pipeline_name => pipeline_instance.getName())
+        @url_builder.build_cause_url(:pipeline_counter => @pipeline_instance.getCounter(), :pipeline_name => @pipeline_instance.getName())
       end
 
-      property :getLabel, as: :label
-      property :getScheduledDate, as: :scheduled_at
-      property :getApprovedBy, as: :triggered_by
-      collection :stages, embedded: true, exec_context: :decorator, decorator: StageRepresenter
+      property :label do
+        @pipeline_instance.getLabel
+      end
 
-      def stages
-        pipeline_instance.getStageHistory().collect do |stage|
+      property :scheduled_at do
+        @pipeline_instance.getScheduledDate
+      end
+
+      property :triggered_by do
+        @pipeline_instance.getApprovedBy
+      end
+
+      embed :stages do
+        stages_params = @pipeline_instance.getStageHistory().collect do |stage|
           [stage, {
-                  pipeline_name:    pipeline_instance.getName(),
-                  pipeline_counter: pipeline_instance.getCounter(),
-                  render_previous:  true
-                }
+            pipeline_name:    @pipeline_instance.getName(),
+            pipeline_counter: @pipeline_instance.getCounter(),
+            render_previous:  true
+          }
           ]
         end
+
+        stages_params.map {|opt| StageRepresenter.new({stage_instance: opt, url_builder: @url_builder})}
       end
     end
   end

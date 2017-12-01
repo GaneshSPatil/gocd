@@ -16,62 +16,52 @@
 
 module ApiV2
   module Dashboard
-    class StageRepresenter < ApiV2::BaseRepresenter
+    class StageRepresenter < ApiV2::MyBaseRepresenter
+      def initialize(options)
+        @stage_instance = options[:stage_instance].first
+        @pipeline_counter = options[:stage_instance].last.delete(:pipeline_counter)
+        @pipeline_name = options[:stage_instance].last.delete(:pipeline_name)
+        @render_previous = options[:stage_instance].last.delete(:render_previous)
 
-      attr_reader :pipeline_counter, :pipeline_name, :render_previous
-      alias_method :stage, :represented
+        @url_builder = options[:url_builder]
 
-      def initialize(args)
-        options = args.extract_options!
-        super(args.first)
-        @pipeline_counter = options.delete(:pipeline_counter)
-        @pipeline_name    = options.delete(:pipeline_name)
-        @render_previous  = options.delete(:render_previous)
+        super(options)
       end
 
-      link :self do |opts|
-        opts[:url_builder].apiv1_stage_instance_by_counter_api_url(pipeline_name: @pipeline_name, pipeline_counter: @pipeline_counter,
-                                                                   stage_name:    stage.getName, stage_counter: stage.getCounter)
+      link :self do
+        @url_builder.apiv1_stage_instance_by_counter_api_url(pipeline_name: @pipeline_name, pipeline_counter: @pipeline_counter,
+                                                             stage_name: @stage_instance.getName, stage_counter: @stage_instance.getCounter)
       end
 
       link :doc do
         'https://api.go.cd/current/#get-stage-instance'
       end
 
-      property :getName, as: :name
-      property :status, exec_context: :decorator
-
-      property :previous_stage, embedded: false, exec_context: :decorator, decorator: StageRepresenter, skip_nil: true
-      property :getApprovedBy, as: :approved_by
-      property :scheduled_at, exec_context: :decorator
-
-      def status
-        stage.getState()
+      property :name do
+        @stage_instance.getName
       end
 
-      def previous_stage
-        if stage.hasPreviousStage
+      property :status do
+        @stage_instance.getState()
+      end
+
+      property :previous_stage do
+        if @stage_instance.hasPreviousStage
           stage_presenter_opts = {
-            pipeline_name:    pipeline_name,
-            pipeline_counter: stage.getPreviousStage().getIdentifier().getPipelineCounter()
+            pipeline_name: @pipeline_name,
+            pipeline_counter: @stage_instance.getPreviousStage().getIdentifier().getPipelineCounter()
           }
-          [stage.getPreviousStage(), stage_presenter_opts]
+
+          StageRepresenter.new({stage_instance: [@stage_instance.getPreviousStage(), stage_presenter_opts], url_builder: @url_builder})
         end
       end
 
-      def scheduled_at
-        stage.getScheduledDate()
+      property :approved_by do
+        @stage_instance.getApprovedBy
       end
 
-      private
-
-      def url_params
-        {
-          pipeline_name:    pipeline_name,
-          pipeline_counter: pipeline_counter,
-          stage_name:       stage.getName(),
-          stage_counter:    stage.getCounter()
-        }
+      property :scheduled_at do
+        @stage_instance.getScheduledDate()
       end
     end
   end

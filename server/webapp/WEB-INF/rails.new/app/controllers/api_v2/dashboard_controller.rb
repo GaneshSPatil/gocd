@@ -14,6 +14,38 @@
 # limitations under the License.
 ##########################################################################
 module ApiV2
+  module Mod
+    def hello
+      "Hello from M od.\n"
+    end
+
+    def hello2
+      "Hello from   Mod.\n"
+    end
+
+    def hello3
+      "Hello frasom Mod.\n"
+    end
+
+    def hello4
+      "Hello f  rom Mod.\n"
+    end
+
+    def hello5
+      "Hello fr om Mod.\n"
+    end
+
+    def hello6
+      "Hello from Mod .\n"
+    end
+  end
+
+  class Klass
+    def hello
+      "Hello from Klass.\n"
+    end
+  end
+
   class DashboardController < ApiV2::BaseController
 
     include ApplicationHelper
@@ -21,11 +53,20 @@ module ApiV2
     def dashboard
       pipeline_selections = pipeline_selections_service.getSelectedPipelines(cookies[:selected_pipelines], current_user_entity_id)
       all_pipelines_groups_for_dashboard = go_dashboard_service.allPipelineGroupsForDashboard(pipeline_selections, current_user)
-
       presenters = Dashboard::PipelineGroupsRepresenter.new({pipeline_groups: all_pipelines_groups_for_dashboard, user: current_user})
       presenters_to_hash = presenters.to_hash(url_builder: self)
 
-      render DEFAULT_FORMAT => presenters_to_hash, status: status
+      $i = 0
+      $num = 1
+      while $i < $num  do
+        Thread.new do
+          k = Klass.new
+          k.extend(Mod)
+          $i +=1
+        end
+      end
+
+      render DEFAULT_FORMAT => {}, status: status
       end
     end
 

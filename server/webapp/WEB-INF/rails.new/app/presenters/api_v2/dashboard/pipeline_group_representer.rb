@@ -16,35 +16,32 @@
 
 module ApiV2
   module Dashboard
-    class PipelineGroupRepresenter < ApiV2::BaseRepresenter
+    class PipelineGroupRepresenter < ApiV2::MyBaseRepresenter
       def initialize(options)
         @pipeline_group = options[:pipeline_group]
         @user = options[:user]
+        @url_builder = options[:url_builder]
 
-        super(@pipeline_group)
+        super(options)
       end
 
-      link :self do |opts|
-        opts[:url_builder].pipeline_group_config_list_api_url
+      link :self do
+        @url_builder.pipeline_group_config_list_api_url
       end
 
       link :doc do
         'https://api.go.cd/current/#pipeline-groups'
       end
 
-      property :name, as: :name, exec_context: :decorator
-      collection :pipelines, exec_context: :decorator
-      property :can_administer, exec_context: :decorator
-
-      def name
+      property :name do
         @pipeline_group.getName()
       end
 
-      def pipelines
+      property :pipelines do
         @pipeline_group.allPipelineNames()
       end
 
-      def can_administer
+      property :can_administer do
         @pipeline_group.canBeAdministeredBy(@user.getUsername().toString())
       end
     end

@@ -16,33 +16,35 @@
 
 module ApiV2
   module Dashboard
-    class PipelineGroupsRepresenter < ApiV2::BaseRepresenter
-      def initialize(options)
-        @groups = options[:pipeline_groups]
-        @user = options[:user]
+    class PipelineGroupsRepresenter < ApiV2::MyBaseRepresenter
 
+      def initialize(options)
+        @groups = options[:represented][:pipeline_groups]
+        @user = options[:represented][:user]
+
+        @url_builder = options[:represented][:url_builder]
         super(options)
       end
 
-      link :self do |opts|
-        opts[:url_builder].apiv2_show_dashboard_url
+      link :self do
+        @url_builder.apiv2_show_dashboard_url
       end
 
       link :doc do
         'https://api.go.cd/current/#dashboard'
       end
 
-      collection :pipeline_groups, embedded: true, exec_context: :decorator, decorator: PipelineGroupRepresenter
-
-      collection :pipelines, embedded: true, exec_context: :decorator, decorator: PipelineRepresenter
-
-      def pipeline_groups
-        @groups.inject([]) {|r, e| r << {pipeline_group: e, user: @user}}
+      embed :pipelines do
+        pipeline_instance_paramerers = @groups.inject([]) {|r, e| r + e.allPipelines()}.inject([]) {|r, e| r << {pipeline: e, user: @user, url_builder: @url_builder}}
+        pipeline_instance_paramerers.map {|opt| PipelineRepresenter.new(embed: {instances: true}, represented: opt)}
       end
 
-      def pipelines
-        @groups.inject([]) {|r, e| r + e.allPipelines()}.inject([]) {|r, e| r << {pipeline: e, user: @user}}
+      embed :pipeline_groups do
+        pipeline_group_paramerers = @groups.inject([]) {
+          |r, e| r << {pipeline_group: e, user: @user, url_builder: @url_builder}}
+        pipeline_group_paramerers.map {|opt| PipelineGroupRepresenter.new(opt)}
       end
+
     end
   end
 end
