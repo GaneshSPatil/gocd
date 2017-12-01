@@ -20,12 +20,9 @@ module ApiV2
 
     def dashboard
       pipeline_selections = pipeline_selections_service.getSelectedPipelines(cookies[:selected_pipelines], current_user_entity_id)
-      all_pipelines_groups_for_dashboard = go_dashboard_service.allPipelineGroupsForDashboard(pipeline_selections, current_user)
+      json = go_dashboard_service.as_json(pipeline_selections, current_user)
 
-      presenters = Dashboard::PipelineGroupsRepresenter.new({pipeline_groups: all_pipelines_groups_for_dashboard, user: current_user})
-      presenters_to_hash = presenters.to_hash(url_builder: self)
-
-      render DEFAULT_FORMAT => presenters_to_hash, status: status
+      render DEFAULT_FORMAT => json, status: status
       end
     end
 

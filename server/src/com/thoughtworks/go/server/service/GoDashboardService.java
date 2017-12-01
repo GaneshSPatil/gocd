@@ -16,6 +16,10 @@
 
 package com.thoughtworks.go.server.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.thoughtworks.go.config.CaseInsensitiveString;
 import com.thoughtworks.go.config.CruiseConfig;
 import com.thoughtworks.go.config.PipelineConfig;
@@ -23,16 +27,17 @@ import com.thoughtworks.go.config.PipelineConfigs;
 import com.thoughtworks.go.config.security.Permissions;
 import com.thoughtworks.go.domain.PipelineGroupVisitor;
 import com.thoughtworks.go.domain.PiplineConfigVisitor;
-import com.thoughtworks.go.server.dashboard.*;
+import com.thoughtworks.go.server.dashboard.GoDashboardCache;
+import com.thoughtworks.go.server.dashboard.GoDashboardCurrentStateLoader;
+import com.thoughtworks.go.server.dashboard.GoDashboardPipeline;
+import com.thoughtworks.go.server.dashboard.GoDashboardPipelineGroup;
 import com.thoughtworks.go.server.domain.Username;
 import com.thoughtworks.go.server.domain.user.PipelineSelections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /* Understands how to interact with the GoDashboardCache cache. */
 @Service
@@ -40,6 +45,7 @@ public class GoDashboardService {
     private final GoDashboardCache cache;
     private final GoDashboardCurrentStateLoader dashboardCurrentStateLoader;
     private final GoConfigService goConfigService;
+    private static final Gson GSON = new GsonBuilder().create();
 
     @Autowired
     public GoDashboardService(GoDashboardCache cache, GoDashboardCurrentStateLoader dashboardCurrentStateLoader, GoConfigService goConfigService) {
@@ -62,6 +68,19 @@ public class GoDashboardService {
         });
 
         return pipelineGroups;
+    }
+
+    public String asJson(PipelineSelections pipelineSelections, Username user) {
+        List<GoDashboardPipelineGroup> groups = allPipelineGroupsForDashboard(pipelineSelections, user);
+        final ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            return mapper.writeValueAsString(GoDashboard.create(groups, user));
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     public void updateCacheForPipeline(CaseInsensitiveString pipelineName) {
