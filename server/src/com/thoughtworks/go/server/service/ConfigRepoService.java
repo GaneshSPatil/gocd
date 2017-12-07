@@ -27,12 +27,16 @@ import com.thoughtworks.go.config.update.UpdateConfigRepoCommand;
 import com.thoughtworks.go.i18n.Localizable;
 import com.thoughtworks.go.i18n.LocalizedMessage;
 import com.thoughtworks.go.server.domain.Username;
+import com.thoughtworks.go.server.representers.api.v1.configRepo.ConfigRepoRepresenter;
+import com.thoughtworks.go.server.representers.api.v1.configRepo.ConfigReposRepresenter;
 import com.thoughtworks.go.server.service.materials.PackageDefinitionService;
 import com.thoughtworks.go.server.service.result.HttpLocalizedOperationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 
 @Service
 public class ConfigRepoService {
@@ -50,6 +54,21 @@ public class ConfigRepoService {
 
     public ConfigRepoConfig getConfigRepo(String repoId) {
         return goConfigService.getConfigForEditing().getConfigRepos().getConfigRepo(repoId);
+    }
+
+    public String getConfigRepoAsJson(String repoId) {
+        ConfigRepoRepresenter representer = new ConfigRepoRepresenter(getConfigRepo(repoId));
+        return representer.toJson();
+    }
+
+    public String getAllConfigReposAsJson() {
+        ConfigReposConfig configRepos = goConfigService.getConfigForEditing().getConfigRepos();
+        ConfigReposRepresenter representer = new ConfigReposRepresenter(configRepos);
+        return representer.toJson();
+    }
+
+    public ConfigRepoConfig parseFromJson(String json) throws IOException {
+        return ConfigRepoRepresenter.fromJson(json);
     }
 
     private void update(Username username, String repoId, HttpLocalizedOperationResult result, EntityConfigUpdateCommand command) {
