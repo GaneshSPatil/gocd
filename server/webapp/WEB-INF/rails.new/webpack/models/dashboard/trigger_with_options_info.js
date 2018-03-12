@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-const Stream               = require('mithril/stream');
 const _                    = require('lodash');
 const s                    = require('helpers/string-plus');
 const sparkRoutes          = require('helpers/spark_routes');
 const AjaxHelper           = require('helpers/ajax_helper');
+const Material             = require('models/dashboard/material');
 const EnvironmentVariables = require('models/dashboard/environment_variables');
 
 const TriggerWithOptionsInfo = function (materials, plainTextVariables, secureVariables) {
@@ -27,6 +27,15 @@ const TriggerWithOptionsInfo = function (materials, plainTextVariables, secureVa
   this.materials          = materials;
   this.plainTextVariables = plainTextVariables;
   this.secureVariables    = secureVariables;
+
+  this.validateTriggerRevisions = (searchVM, vm) => {
+    _.each(self.materials, (material) => {
+      if (material.selection() !== searchVM[material.name]) {
+        const msg = `Invalid revision ${searchVM[material.name]} found for material ${material.name}`;
+        vm.error(msg);
+      }
+    });
+  };
 
   this.getTriggerOptionsJSON = () => {
     const json = {};
@@ -60,14 +69,22 @@ const TriggerWithOptionsInfo = function (materials, plainTextVariables, secureVa
   };
 };
 
+class Revision {
+  constructor({date, user, comment, revision}) {
+    this.date     = date;
+    this.user     = user;
+    this.comment  = comment;
+    this.revision = revision;
+  }
+}
+
 const isSecure    = (v) => v.secure;
 const isPlainText = (v) => !v.secure;
 
-TriggerWithOptionsInfo.fromJSON = (json) => {
-  const materials = JSON.parse(JSON.stringify(json.materials, s.camelCaser));
-
-  _.each(materials, (material) => {
-    material.selection = Stream();
+TriggerWithOptionsInfo.fromJSON = (json, pipelineName) => {
+  const materials = _.map(JSON.parse(JSON.stringify(json.materials, s.camelCaser)), function (materialMap) {
+    materialMap.revision = new Revision({revision: _.get(materialMap, 'revision.lastRunRevision'), ...materialMap.revision});
+    return new Material({pipelineName, ...materialMap});
   });
 
   const plainTextVariables = EnvironmentVariables.fromJSON(_.filter(json.variables, isPlainText));
@@ -79,8 +96,9 @@ TriggerWithOptionsInfo.fromJSON = (json) => {
 TriggerWithOptionsInfo.all = function (pipelineName) {
   return AjaxHelper.GET({
     url:        sparkRoutes.pipelineTriggerWithOptionsViewPath(pipelineName),
-    type:       TriggerWithOptionsInfo,
     apiVersion: 'v1',
+  }).then(function (data) {
+    return TriggerWithOptionsInfo.fromJSON(data, pipelineName);
   });
 };
 

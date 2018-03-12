@@ -49,9 +49,9 @@ function blowUpAjaxFunction() {
 const realAjaxFunction = window.XMLHttpRequest;
 
 beforeEach(() => {
-  if (window.XMLHttpRequest !== blowUpAjaxFunction) {
-    window.XMLHttpRequest = blowUpAjaxFunction;
-  }
+  // if (window.XMLHttpRequest !== blowUpAjaxFunction) {
+  //   window.XMLHttpRequest = blowUpAjaxFunction;
+  // }
 });
 
 afterEach(() => {

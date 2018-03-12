@@ -44,7 +44,7 @@ const MaterialsForTriggerWidget = {
         <li class={self.activeClassForMaterial(name)}
             onclick={vm.selectMaterial.bind(vm, name)}>
           <span class="material-name">{material.name}</span>
-          <span class="latest-revision">{material.revision.lastRunRevision}</span>
+          <span class="latest-revision">{material.revision.revision}</span>
         </li>
       );
     });
@@ -61,8 +61,7 @@ const MaterialsForTriggerWidget = {
 
         <div class="v-tab_container">
           <MaterialInfoWidget key={materialThatShouldBeVisible.name}
-                              material={materialThatShouldBeVisible}
-                              searchVM={vnode.attrs.searchVM[materialThatShouldBeVisible.name]}/>
+                              material={materialThatShouldBeVisible}/>
         </div>
       </div>);
   }

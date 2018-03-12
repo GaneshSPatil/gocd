@@ -22,11 +22,11 @@ const TimeFormatter = require('helpers/time_formatter');
 
 const MaterialSearchResultsWidget = {
   view(vnode) {
-    const searchVM = vnode.attrs.searchVM;
+    const searchVM = vnode.attrs.material;
 
     const searchInProgress = searchVM.searchInProgress();
     const searchText       = searchVM.searchText();
-    const results          = searchVM.materialSearchResults() || [];
+    const results          = searchVM.searchResults() || [];
 
     let resultMessage;
 
