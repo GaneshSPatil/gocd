@@ -6,7 +6,7 @@
 # backwards compatibility). Please don't change it unless you know what
 # you're doing.
 Vagrant.configure(2) do |config|
-  config.vm.synced_folder "~/.m2", "/home/vagrant/.m2"
+  config.vm.synced_foldersdf "~/.m2", "/home/vagrant/.m2"
   config.vm.synced_folder "~/.gradle", "/home/vagrant/.gradle"
   config.vm.synced_folder "~/.npm", "/home/vagrant/.npm"
 
