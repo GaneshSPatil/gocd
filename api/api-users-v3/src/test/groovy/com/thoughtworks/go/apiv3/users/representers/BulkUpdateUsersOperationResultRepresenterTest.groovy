@@ -17,14 +17,14 @@
 package com.thoughtworks.go.apiv3.users.representers
 
 
-import com.thoughtworks.go.server.service.result.BulkDeletionFailureResult
+import com.thoughtworks.go.server.service.result.BulkUpdateUsersOperationResult
 import com.thoughtworks.go.server.service.result.HttpLocalizedOperationResult
 import org.junit.jupiter.api.Test
 
 import static com.thoughtworks.go.api.base.JsonUtils.toObject
 import static net.javacrumbs.jsonunit.fluent.JsonFluentAssert.assertThatJson
 
-class BulkDeletionFailureResultRepresenterTest {
+class BulkUpdateUsersOperationResultRepresenterTest {
 
   @Test
   void 'render the bulk deletion failure result'() {
@@ -33,7 +33,7 @@ class BulkDeletionFailureResultRepresenterTest {
     def result = new HttpLocalizedOperationResult()
     result.unprocessableEntity("Deletion failed because some users were either enabled or do not exist.")
 
-    def bulkDeletionFailureResult = new BulkDeletionFailureResult(nonExistingUsers, enabledUsers)
+    def bulkDeletionFailureResult = new BulkUpdateUsersOperationResult(nonExistingUsers, enabledUsers)
 
     def expectedJson = [
       message           : "Deletion failed because some users were either enabled or do not exist.",
@@ -41,7 +41,7 @@ class BulkDeletionFailureResultRepresenterTest {
       enabled_users     : enabledUsers
     ]
 
-    def json = toObject({ BulkDeletionFailureResultRepresenter.toJSON(it, bulkDeletionFailureResult, result) })
+    def json = toObject({ BulkDeletionFailureResultRepresenter.toJSON(it, bulkDeletionFailureResult) })
     assertThatJson(json).isEqualTo(expectedJson)
   }
 
@@ -52,14 +52,14 @@ class BulkDeletionFailureResultRepresenterTest {
     def result = new HttpLocalizedOperationResult()
     result.unprocessableEntity("Deletion failed because some users were either enabled or do not exist.")
 
-    def bulkDeletionFailureResult = new BulkDeletionFailureResult(nonExistingUsers, enabledUsers)
+    def bulkDeletionFailureResult = new BulkUpdateUsersOperationResult(nonExistingUsers, enabledUsers)
 
     def expectedJson = [
       message      : "Deletion failed because some users were either enabled or do not exist.",
       enabled_users: enabledUsers
     ]
 
-    def json = toObject({ BulkDeletionFailureResultRepresenter.toJSON(it, bulkDeletionFailureResult, result) })
+    def json = toObject({ BulkDeletionFailureResultRepresenter.toJSON(it, bulkDeletionFailureResult) })
     assertThatJson(json).isEqualTo(expectedJson)
   }
 
@@ -70,14 +70,14 @@ class BulkDeletionFailureResultRepresenterTest {
     def result = new HttpLocalizedOperationResult()
     result.unprocessableEntity("Deletion failed because some users were either enabled or do not exist.")
 
-    def bulkDeletionFailureResult = new BulkDeletionFailureResult(nonExistingUsers, enabledUsers)
+    def bulkDeletionFailureResult = new BulkUpdateUsersOperationResult(nonExistingUsers, enabledUsers)
 
     def expectedJson = [
       message           : "Deletion failed because some users were either enabled or do not exist.",
       non_existent_users: nonExistingUsers
     ]
 
-    def json = toObject({ BulkDeletionFailureResultRepresenter.toJSON(it, bulkDeletionFailureResult, result) })
+    def json = toObject({ BulkDeletionFailureResultRepresenter.toJSON(it, bulkDeletionFailureResult) })
     assertThatJson(json).isEqualTo(expectedJson)
   }
 }

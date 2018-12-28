@@ -34,7 +34,7 @@ import com.thoughtworks.go.server.domain.Username;
 import com.thoughtworks.go.server.service.RoleConfigService;
 import com.thoughtworks.go.server.service.SecurityService;
 import com.thoughtworks.go.server.service.UserService;
-import com.thoughtworks.go.server.service.result.BulkDeletionFailureResult;
+import com.thoughtworks.go.server.service.result.BulkUpdateUsersOperationResult;
 import com.thoughtworks.go.server.service.result.HttpLocalizedOperationResult;
 import com.thoughtworks.go.spark.Routes;
 import com.thoughtworks.go.spark.spring.SparkSpringController;
@@ -152,31 +152,31 @@ public class UsersControllerV3 extends ApiController implements SparkSpringContr
     }
 
     public String bulkUpdateUsersState(Request req, Response res) throws Exception {
-        HttpLocalizedOperationResult result = new HttpLocalizedOperationResult();
+        BulkUpdateUsersOperationResult result = new BulkUpdateUsersOperationResult();
         JsonReader jsonReader = GsonTransformer.getInstance().jsonReaderFrom(req.body());
         List<String> users = jsonReader.readStringArrayIfPresent("users").orElse(Collections.emptyList());
         boolean shouldEnable = jsonReader.readJsonObject("operations").getBoolean("enable");
 
-        BulkDeletionFailureResult updateFailedResult = userService.changeUsersState(users, shouldEnable, result);
+        userService.bulkEnableDisableUsers(users, shouldEnable, result);
 
-        if (!updateFailedResult.isEmpty()) {
+        if (!result.isSuccessful()) {
             res.status(result.httpCode());
-            return writerForTopLevelObject(req, res, outputWriter -> BulkDeletionFailureResultRepresenter.toJSON(outputWriter, updateFailedResult, result));
+            return writerForTopLevelObject(req, res, outputWriter -> BulkDeletionFailureResultRepresenter.toJSON(outputWriter, result));
         }
 
         return renderHTTPOperationResult(result, req, res);
     }
 
     public String bulkDelete(Request req, Response res) throws Exception {
-        HttpLocalizedOperationResult result = new HttpLocalizedOperationResult();
+        BulkUpdateUsersOperationResult result = new BulkUpdateUsersOperationResult();
         JsonReader jsonReader = GsonTransformer.getInstance().jsonReaderFrom(req.body());
         List<String> users = jsonReader.readStringArrayIfPresent("users").orElse(Collections.emptyList());
 
-        BulkDeletionFailureResult deletionFailureResult = userService.deleteUsers(users, result);
+        userService.deleteUsers(users, result);
 
-        if (!deletionFailureResult.isEmpty()) {
+        if (!result.isSuccessful()) {
             res.status(result.httpCode());
-            return writerForTopLevelObject(req, res, outputWriter -> BulkDeletionFailureResultRepresenter.toJSON(outputWriter, deletionFailureResult, result));
+            return writerForTopLevelObject(req, res, outputWriter -> BulkDeletionFailureResultRepresenter.toJSON(outputWriter, result));
         }
 
         return renderHTTPOperationResult(result, req, res);
