@@ -94,6 +94,7 @@ public class UsersControllerV3 extends ApiController implements SparkSpringContr
             patch(Routes.Users.USER_NAME, this.mimeType, this::patchUser);
             delete(Routes.Users.USER_NAME, this.mimeType, this::deleteUser);
             delete("", this.mimeType, this::bulkDelete);
+            patch(Routes.Users.USER_STATE, this.mimeType, this::bulkUpdateUsersState);
         });
     }
 
@@ -147,6 +148,22 @@ public class UsersControllerV3 extends ApiController implements SparkSpringContr
         String username = req.params("login_name");
         HttpLocalizedOperationResult result = new HttpLocalizedOperationResult();
         userService.deleteUser(username, result);
+        return renderHTTPOperationResult(result, req, res);
+    }
+
+    public String bulkUpdateUsersState(Request req, Response res) throws Exception {
+        HttpLocalizedOperationResult result = new HttpLocalizedOperationResult();
+        JsonReader jsonReader = GsonTransformer.getInstance().jsonReaderFrom(req.body());
+        List<String> users = jsonReader.readStringArrayIfPresent("users").orElse(Collections.emptyList());
+        boolean shouldEnable = jsonReader.readJsonObject("operations").getBoolean("enable");
+
+        BulkDeletionFailureResult updateFailedResult = userService.changeUsersState(users, shouldEnable, result);
+
+        if (!updateFailedResult.isEmpty()) {
+            res.status(result.httpCode());
+            return writerForTopLevelObject(req, res, outputWriter -> BulkDeletionFailureResultRepresenter.toJSON(outputWriter, updateFailedResult, result));
+        }
+
         return renderHTTPOperationResult(result, req, res);
     }
 

@@ -36,7 +36,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 import static com.thoughtworks.go.helper.SecurityConfigMother.securityConfigWithRole;
 import static org.hamcrest.CoreMatchers.anyOf;
@@ -503,7 +506,7 @@ public class UserServiceTest {
 
     @Test
     public void shouldFailWithErrorEvenIfOneUserIsEnabledDuringBulkDelete() {
-        List<String> usernames =Arrays.asList("john", "joan");
+        List<String> usernames = Arrays.asList("john", "joan");
         User john = new User("john");
         User joan = new User("joan");
         HttpLocalizedOperationResult result = new HttpLocalizedOperationResult();
@@ -539,6 +542,112 @@ public class UserServiceTest {
 
         HttpLocalizedOperationResult result = new HttpLocalizedOperationResult();
         userService.deleteUsers(usernames, result);
+
+        assertThat(result.isSuccessful(), is(false));
+        assertThat(result.message(), is("No users selected."));
+    }
+
+    @Test
+    public void shouldEnableAllSpecifiedUsersSuccessfully() {
+        List<String> usernames = Arrays.asList("john", "joan");
+
+        User john = new User("john");
+        john.disable();
+        User joan = new User("joan");
+        joan.disable();
+
+        HttpLocalizedOperationResult result = new HttpLocalizedOperationResult();
+
+        when(userDao.findUser("john")).thenReturn(john);
+        when(userDao.findUser("joan")).thenReturn(joan);
+        userService.changeUsersState(usernames, true, result);
+
+        verify(userDao).enableUsers(usernames);
+        assertThat(result.isSuccessful(), is(true));
+        assertThat(result.message(), is("Users 'john, joan' were enabled successfully."));
+    }
+
+    @Test
+    public void shouldDisableAllSpecifiedUsersSuccessfully() {
+        User admin = new User("admin");
+
+        List<String> usernames = Arrays.asList("john", "joan");
+
+        User john = new User("john");
+        User joan = new User("joan");
+
+        HttpLocalizedOperationResult result = new HttpLocalizedOperationResult();
+
+        when(userDao.findUser("john")).thenReturn(john);
+        when(userDao.findUser("joan")).thenReturn(joan);
+        when(userDao.enabledUsers()).thenReturn(Arrays.asList(joan, joan, admin));
+        when(securityService.isUserAdmin(new Username("admin"))).thenReturn(true);
+
+        userService.changeUsersState(usernames, false, result);
+
+        verify(userDao).disableUsers(usernames);
+        assertThat(result.isSuccessful(), is(true));
+        assertThat(result.message(), is("Users 'john, joan' were disabled successfully."));
+    }
+
+    @Test
+    public void shouldFailWithErrorIfAllAdminUsersAreTriedToBeDisabled() {
+        List<String> usernames = Arrays.asList("john", "joan");
+
+        User john = new User("john");
+        User joan = new User("joan");
+
+        HttpLocalizedOperationResult result = new HttpLocalizedOperationResult();
+
+        when(userDao.findUser("john")).thenReturn(john);
+        when(userDao.findUser("joan")).thenReturn(joan);
+        when(userDao.enabledUsers()).thenReturn(Arrays.asList(joan, joan));
+
+        userService.changeUsersState(usernames, false, result);
+
+        verify(userDao, never()).disableUsers(usernames);
+        assertThat(result.isSuccessful(), is(false));
+        assertThat(result.message(), containsString("Did not disable any of the selected users. Ensure that all configured admins are not being disabled."));
+    }
+
+    @Test
+    public void shouldFailWithErrorEvenIfOneUserDoesNotExistDuringBulkEnableOrDisableUsers() {
+        List<String> usernames = Arrays.asList("john", "joan");
+        User john = new User("John");
+        john.disable();
+        HttpLocalizedOperationResult result = new HttpLocalizedOperationResult();
+
+        BulkDeletionFailureResult expectedBulkDeletionFailureResult = new BulkDeletionFailureResult();
+        expectedBulkDeletionFailureResult.addNonExistentUserName("joan");
+
+        when(userDao.findUser("joan")).thenReturn(new NullUser());
+        when(userDao.findUser("john")).thenReturn(john);
+
+        BulkDeletionFailureResult bulkDeletionFailureResult = userService.changeUsersState(usernames, true, result);
+
+        assertThat(result.isSuccessful(), is(false));
+        assertThat(result.message(), containsString("Update failed because some users do not exist."));
+        assertThat(bulkDeletionFailureResult.getNonExistentUsers(), is(expectedBulkDeletionFailureResult.getNonExistentUsers()));
+        assertThat(bulkDeletionFailureResult.getEnabledUsers(), is(expectedBulkDeletionFailureResult.getEnabledUsers()));
+    }
+
+    @Test
+    public void shouldFailWithErrorIfNoUsersAreProvidedDuringBulkEnableOrDisableUsers() {
+        List<String> usernames = null;
+
+        HttpLocalizedOperationResult result = new HttpLocalizedOperationResult();
+        userService.changeUsersState(usernames, true, result);
+
+        assertThat(result.isSuccessful(), is(false));
+        assertThat(result.message(), is("No users selected."));
+    }
+
+    @Test
+    public void shouldFailWithErrorIfEmptyUsersAreProvidedDuringBulkEnableOrDisableUsers() {
+        List<String> usernames = new ArrayList<>();
+
+        HttpLocalizedOperationResult result = new HttpLocalizedOperationResult();
+        userService.changeUsersState(usernames, true, result);
 
         assertThat(result.isSuccessful(), is(false));
         assertThat(result.message(), is("No users selected."));

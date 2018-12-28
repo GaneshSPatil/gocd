@@ -46,6 +46,7 @@ import static com.thoughtworks.go.i18n.LocalizedMessage.resourceAlreadyExists;
 import static com.thoughtworks.go.i18n.LocalizedMessage.resourceNotFound;
 import static com.thoughtworks.go.serverhealth.HealthStateScope.GLOBAL;
 import static com.thoughtworks.go.serverhealth.HealthStateType.general;
+import static org.apache.commons.lang3.StringUtils.join;
 
 @Service
 public class UserService {
@@ -297,6 +298,45 @@ public class UserService {
             }
         }
         return bulkDeletionFailureResult;
+    }
+
+    private BulkDeletionFailureResult userExistsValidation(List<String> userNames) {
+        BulkDeletionFailureResult bulkDeletionFailureResult = new BulkDeletionFailureResult();
+        for (String userName : userNames) {
+            User user = userDao.findUser(userName);
+            if (user instanceof NullUser) {
+                bulkDeletionFailureResult.addNonExistentUserName(userName);
+            }
+        }
+        return bulkDeletionFailureResult;
+    }
+
+
+    public BulkDeletionFailureResult changeUsersState(List<String> userNames, boolean shouldEnable, HttpLocalizedOperationResult result) {
+        if (userNames == null || userNames.isEmpty()) {
+            result.badRequest("No users selected.");
+            return new BulkDeletionFailureResult();
+        }
+
+        synchronized (enableUserMutex) {
+            BulkDeletionFailureResult bulkDeletionFailureResult = userExistsValidation(userNames);
+
+            if (bulkDeletionFailureResult.isEmpty()) {
+                if (shouldEnable) {
+                    enable(userNames, result);
+                } else {
+                    disable(userNames, result);
+                }
+                if (result.isSuccessful()) {
+                    String enabledOrDisabled = shouldEnable ? "enabled" : "disabled";
+                    result.setMessage(String.format("Users '%s' were %s successfully.", join(userNames, ", "), enabledOrDisabled));
+                }
+            } else {
+                result.unprocessableEntity("Update failed because some users do not exist.");
+            }
+
+            return bulkDeletionFailureResult;
+        }
     }
 
     public enum SortableColumn {
