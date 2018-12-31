@@ -87,6 +87,7 @@ public class UsersControllerV3 extends ApiController implements SparkSpringContr
 
             before("", this.mimeType, this.apiAuthenticationHelper::checkAdminUserAnd403);
             before(Routes.Users.USER_NAME, this.mimeType, this.apiAuthenticationHelper::checkAdminUserAnd403);
+            before(Routes.Users.USER_STATE, this.mimeType, this.apiAuthenticationHelper::checkAdminUserAnd403);
 
             get("", this.mimeType, this::index);
             get(Routes.Users.USER_NAME, this.mimeType, this::show);
