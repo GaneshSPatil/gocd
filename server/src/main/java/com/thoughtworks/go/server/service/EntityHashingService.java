@@ -18,6 +18,7 @@ package com.thoughtworks.go.server.service;
 
 import com.google.gson.GsonBuilder;
 import com.thoughtworks.go.config.*;
+import com.thoughtworks.go.config.elastic.ClusterConfig;
 import com.thoughtworks.go.config.elastic.ElasticProfile;
 import com.thoughtworks.go.config.merge.MergePipelineConfigs;
 import com.thoughtworks.go.config.registry.ConfigElementImplementationRegistry;
@@ -74,6 +75,7 @@ public class EntityHashingService implements ConfigChangedListener, Initializer 
         goConfigService.register(new RoleConfigListener());
         goConfigService.register(new ArtifactStoreListener());
         goConfigService.register(new AdminsConfigListener());
+        goConfigService.register(new ClusterConfigListener());
     }
 
     @Override
@@ -116,6 +118,11 @@ public class EntityHashingService implements ConfigChangedListener, Initializer 
     }
 
     public String md5ForEntity(ElasticProfile config) {
+        String cacheKey = cacheKey(config, config.getId());
+        return getDomainEntityMd5FromCache(config, cacheKey);
+    }
+
+    public String md5ForEntity(ClusterConfig config) {
         String cacheKey = cacheKey(config, config.getId());
         return getDomainEntityMd5FromCache(config, cacheKey);
     }
@@ -268,6 +275,13 @@ public class EntityHashingService implements ConfigChangedListener, Initializer 
         @Override
         public void onEntityConfigChange(ElasticProfile profile) {
             removeFromCache(profile, profile.getId());
+        }
+    }
+
+    class ClusterConfigListener extends EntityConfigChangedListener<ClusterConfig> {
+        @Override
+        public void onEntityConfigChange(ClusterConfig clusterConfig) {
+            removeFromCache(clusterConfig, clusterConfig.getId());
         }
     }
 

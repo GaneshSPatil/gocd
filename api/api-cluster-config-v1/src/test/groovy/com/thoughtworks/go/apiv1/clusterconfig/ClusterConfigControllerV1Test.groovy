@@ -23,6 +23,7 @@ import com.thoughtworks.go.apiv1.clusterconfig.representers.ClusterConfigsRepres
 import com.thoughtworks.go.config.elastic.ClusterConfig
 import com.thoughtworks.go.config.elastic.ClusterConfigs
 import com.thoughtworks.go.server.service.ClusterConfigService
+import com.thoughtworks.go.server.service.EntityHashingService
 import com.thoughtworks.go.spark.AdminUserSecurity
 import com.thoughtworks.go.spark.ControllerTrait
 import com.thoughtworks.go.spark.SecurityServiceTrait
@@ -36,7 +37,10 @@ import static org.mockito.MockitoAnnotations.initMocks
 
 class ClusterConfigControllerV1Test implements SecurityServiceTrait, ControllerTrait<ClusterConfigControllerV1> {
   @Mock
-  ClusterConfigService clusterConfigService;
+  ClusterConfigService clusterConfigService
+
+  @Mock
+  EntityHashingService entityHashingService
 
   @BeforeEach
   void setUp() {
@@ -45,7 +49,7 @@ class ClusterConfigControllerV1Test implements SecurityServiceTrait, ControllerT
 
   @Override
   ClusterConfigControllerV1 createControllerInstance() {
-    new ClusterConfigControllerV1(new ApiAuthenticationHelper(securityService, goConfigService), clusterConfigService)
+    new ClusterConfigControllerV1(new ApiAuthenticationHelper(securityService, goConfigService), clusterConfigService, entityHashingService)
   }
 
   @Nested
@@ -118,6 +122,7 @@ class ClusterConfigControllerV1Test implements SecurityServiceTrait, ControllerT
         clusterConfig = new ClusterConfig("docker", "cd.go.docker")
 
         when(clusterConfigService.getPluginProfiles()).thenReturn(new ClusterConfigs(clusterConfig))
+        when(entityHashingService.md5ForEntity(clusterConfig)).thenReturn("md5")
       }
 
       @Test
@@ -127,8 +132,18 @@ class ClusterConfigControllerV1Test implements SecurityServiceTrait, ControllerT
         assertThatResponse()
           .isOk()
           .hasContentType(controller.mimeType)
+          .hasEtag('"md5"')
           .hasBodyWithJsonObject(clusterConfig, ClusterConfigRepresenter.class)
       }
+
+      @Test
+      void 'should render not modified when ETag matches'() {
+        getWithApiHeader(controller.controllerPath("/docker"), ['if-none-match': 'md5'])
+
+        assertThatResponse()
+          .isNotModified()
+      }
+
 
       @Test
       void 'should render not found exception for non existent cluster config'() {

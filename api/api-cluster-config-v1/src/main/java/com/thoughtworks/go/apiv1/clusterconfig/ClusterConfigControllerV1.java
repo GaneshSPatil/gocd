@@ -18,13 +18,18 @@ package com.thoughtworks.go.apiv1.clusterconfig;
 
 import com.thoughtworks.go.api.ApiController;
 import com.thoughtworks.go.api.ApiVersion;
+import com.thoughtworks.go.api.CrudController;
+import com.thoughtworks.go.api.base.OutputWriter;
+import com.thoughtworks.go.api.representers.JsonReader;
 import com.thoughtworks.go.api.spring.ApiAuthenticationHelper;
+import com.thoughtworks.go.api.util.GsonTransformer;
 import com.thoughtworks.go.apiv1.clusterconfig.representers.ClusterConfigRepresenter;
 import com.thoughtworks.go.apiv1.clusterconfig.representers.ClusterConfigsRepresenter;
 import com.thoughtworks.go.config.PluginProfiles;
 import com.thoughtworks.go.config.elastic.ClusterConfig;
 import com.thoughtworks.go.config.exceptions.RecordNotFoundException;
 import com.thoughtworks.go.server.service.ClusterConfigService;
+import com.thoughtworks.go.server.service.EntityHashingService;
 import com.thoughtworks.go.spark.Routes;
 import com.thoughtworks.go.spark.spring.SparkSpringController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,20 +38,23 @@ import spark.Request;
 import spark.Response;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 
 import static spark.Spark.*;
 
 @Component
-public class ClusterConfigControllerV1 extends ApiController implements SparkSpringController {
+public class ClusterConfigControllerV1 extends ApiController implements SparkSpringController, CrudController<ClusterConfig> {
 
     private final ApiAuthenticationHelper apiAuthenticationHelper;
     private final ClusterConfigService clusterConfigService;
+    private EntityHashingService entityHashingService;
 
     @Autowired
-    public ClusterConfigControllerV1(ApiAuthenticationHelper apiAuthenticationHelper, ClusterConfigService clusterConfigService) {
+    public ClusterConfigControllerV1(ApiAuthenticationHelper apiAuthenticationHelper, ClusterConfigService clusterConfigService, EntityHashingService entityHashingService) {
         super(ApiVersion.v1);
         this.apiAuthenticationHelper = apiAuthenticationHelper;
         this.clusterConfigService = clusterConfigService;
+        this.entityHashingService = entityHashingService;
     }
 
     @Override
@@ -76,13 +84,35 @@ public class ClusterConfigControllerV1 extends ApiController implements SparkSpr
     }
 
     public String getClusterConfig(Request request, Response response) throws IOException {
-        String clusterId = request.params("cluster_id");
-        final ClusterConfig clusterConfig = clusterConfigService.getPluginProfiles().find(clusterId);
+        final ClusterConfig clusterConfig = fetchEntityFromConfig(request.params("cluster_id"));
+        String etag = etagFor(clusterConfig);
 
-        if (clusterConfig == null) {
-            throw new RecordNotFoundException();
+        if (fresh(request, etag)) {
+            return notModified(response);
         }
 
-        return writerForTopLevelObject(request, response, outputWriter -> ClusterConfigRepresenter.toJSON(outputWriter, clusterConfig));
+        setEtagHeader(response, etag);
+        return writerForTopLevelObject(request, response, jsonWriter(clusterConfig));
+    }
+
+    @Override
+    public String etagFor(ClusterConfig entityFromServer) {
+        return entityHashingService.md5ForEntity(entityFromServer);
+    }
+
+    @Override
+    public ClusterConfig doFetchEntityFromConfig(String name) {
+        return clusterConfigService.getPluginProfiles().find(name);
+    }
+
+    @Override
+    public ClusterConfig buildEntityFromRequestBody(Request req) {
+        JsonReader jsonReader = GsonTransformer.getInstance().jsonReaderFrom(req.body());
+        return ClusterConfigRepresenter.fromJSON(jsonReader);
+    }
+
+    @Override
+    public Consumer<OutputWriter> jsonWriter(ClusterConfig clusterConfig) {
+        return outputWriter -> ClusterConfigRepresenter.toJSON(outputWriter, clusterConfig);
     }
 }
