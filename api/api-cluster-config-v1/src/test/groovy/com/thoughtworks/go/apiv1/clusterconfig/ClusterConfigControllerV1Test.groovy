@@ -18,6 +18,7 @@ package com.thoughtworks.go.apiv1.clusterconfig
 
 import com.thoughtworks.go.api.SecurityTestTrait
 import com.thoughtworks.go.api.spring.ApiAuthenticationHelper
+import com.thoughtworks.go.apiv1.clusterconfig.representers.ClusterConfigRepresenter
 import com.thoughtworks.go.apiv1.clusterconfig.representers.ClusterConfigsRepresenter
 import com.thoughtworks.go.config.elastic.ClusterConfig
 import com.thoughtworks.go.config.elastic.ClusterConfigs
@@ -78,7 +79,7 @@ class ClusterConfigControllerV1Test implements SecurityServiceTrait, ControllerT
       }
 
       @Test
-      void 'should render current user'() {
+      void 'should render all clusters'() {
         getWithApiHeader(controller.controllerBasePath())
 
         assertThatResponse()
@@ -86,6 +87,57 @@ class ClusterConfigControllerV1Test implements SecurityServiceTrait, ControllerT
           .hasContentType(controller.mimeType)
           .hasBodyWithJsonObject(new ClusterConfigs(clusterConfig), ClusterConfigsRepresenter.class)
       }
+    }
+  }
+
+  @Nested
+  class GetClusterConfig {
+    @Nested
+    class Security implements SecurityTestTrait, AdminUserSecurity {
+
+      @Override
+      String getControllerMethodUnderTest() {
+        return "getClusterConfig"
+      }
+
+      @Override
+      void makeHttpCall() {
+        getWithApiHeader(controller.controllerPath("/docker"))
+      }
+    }
+
+    @Nested
+    class AsAdminUser {
+      def clusterConfig
+
+      @BeforeEach
+      void setUp() {
+        enableSecurity()
+        loginAsAdmin()
+
+        clusterConfig = new ClusterConfig("docker", "cd.go.docker")
+
+        when(clusterConfigService.getPluginProfiles()).thenReturn(new ClusterConfigs(clusterConfig))
+      }
+
+      @Test
+      void 'should render cluster config'() {
+        getWithApiHeader(controller.controllerPath("/docker"))
+
+        assertThatResponse()
+          .isOk()
+          .hasContentType(controller.mimeType)
+          .hasBodyWithJsonObject(clusterConfig, ClusterConfigRepresenter.class)
+      }
+
+      @Test
+      void 'should render not found exception for non existent cluster config'() {
+        getWithApiHeader(controller.controllerPath("/test"))
+
+        assertThatResponse()
+          .isNotFound()
+      }
+
     }
   }
 }

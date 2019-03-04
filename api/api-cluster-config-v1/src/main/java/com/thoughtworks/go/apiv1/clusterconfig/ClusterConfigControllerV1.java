@@ -19,9 +19,11 @@ package com.thoughtworks.go.apiv1.clusterconfig;
 import com.thoughtworks.go.api.ApiController;
 import com.thoughtworks.go.api.ApiVersion;
 import com.thoughtworks.go.api.spring.ApiAuthenticationHelper;
+import com.thoughtworks.go.apiv1.clusterconfig.representers.ClusterConfigRepresenter;
 import com.thoughtworks.go.apiv1.clusterconfig.representers.ClusterConfigsRepresenter;
 import com.thoughtworks.go.config.PluginProfiles;
 import com.thoughtworks.go.config.elastic.ClusterConfig;
+import com.thoughtworks.go.config.exceptions.RecordNotFoundException;
 import com.thoughtworks.go.server.service.ClusterConfigService;
 import com.thoughtworks.go.spark.Routes;
 import com.thoughtworks.go.spark.spring.SparkSpringController;
@@ -38,13 +40,13 @@ import static spark.Spark.*;
 public class ClusterConfigControllerV1 extends ApiController implements SparkSpringController {
 
     private final ApiAuthenticationHelper apiAuthenticationHelper;
-    private final ClusterConfigService cLusterConfigService;
+    private final ClusterConfigService clusterConfigService;
 
     @Autowired
     public ClusterConfigControllerV1(ApiAuthenticationHelper apiAuthenticationHelper, ClusterConfigService clusterConfigService) {
         super(ApiVersion.v1);
         this.apiAuthenticationHelper = apiAuthenticationHelper;
-        this.cLusterConfigService = clusterConfigService;
+        this.clusterConfigService = clusterConfigService;
     }
 
     @Override
@@ -59,13 +61,28 @@ public class ClusterConfigControllerV1 extends ApiController implements SparkSpr
             before("/*", mimeType, this::setContentType);
 
             before("", this.mimeType, this.apiAuthenticationHelper::checkAdminUserAnd403);
+            before("/*", this.mimeType, this.apiAuthenticationHelper::checkAdminUserAnd403);
 
             get("", mimeType, this::index);
+            get(Routes.ClusterConfigAPI.ID, mimeType, this::getClusterConfig);
+
+            exception(RecordNotFoundException.class, this::notFound);
         });
     }
 
     public String index(Request request, Response response) throws IOException {
-        final PluginProfiles<ClusterConfig> clusters = cLusterConfigService.getPluginProfiles();
+        final PluginProfiles<ClusterConfig> clusters = clusterConfigService.getPluginProfiles();
         return writerForTopLevelObject(request, response, outputWriter -> ClusterConfigsRepresenter.toJSON(outputWriter, clusters));
+    }
+
+    public String getClusterConfig(Request request, Response response) throws IOException {
+        String clusterId = request.params("cluster_id");
+        final ClusterConfig clusterConfig = clusterConfigService.getPluginProfiles().find(clusterId);
+
+        if (clusterConfig == null) {
+            throw new RecordNotFoundException();
+        }
+
+        return writerForTopLevelObject(request, response, outputWriter -> ClusterConfigRepresenter.toJSON(outputWriter, clusterConfig));
     }
 }
