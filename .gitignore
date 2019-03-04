@@ -342,4 +342,7 @@ util/out/
 util/target/
 plugin-infra/go-plugin-infra/felix-cache/
 **/*.log
-
+api/api-cluster-config-v1/out/
+api/api-cluster-config-v1/target/
+api/api-cluster-config-v1/logs/
+api/api-cluster-config-v1/config/

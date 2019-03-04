@@ -343,6 +343,20 @@ public class Routes {
         }
     }
 
+    public static class ClusterConfigAPI {
+        public static final String BASE = "/api/admin/elastic/clusters";
+        public static final String ID = "/:cluster_id";
+        public static final String DOC = apiDocsUrl("#cluster-config");
+
+        public static String find() {
+            return BASE + ID;
+        }
+
+        public static String id(String id) {
+            return find().replaceAll(":cluster_id", id);
+        }
+    }
+
     public static class AgentsAPI {
         public static final String BASE = "/api/agents";
         public static final String UUID = "/:uuid";
