@@ -24,6 +24,7 @@ import com.thoughtworks.go.config.elastic.ElasticProfile
 import com.thoughtworks.go.config.elastic.ElasticProfiles
 import com.thoughtworks.go.i18n.LocalizedMessage
 import com.thoughtworks.go.server.domain.Username
+import com.thoughtworks.go.server.service.ClusterProfilesService
 import com.thoughtworks.go.server.service.ElasticProfileService
 import com.thoughtworks.go.server.service.EntityHashingService
 import com.thoughtworks.go.server.service.result.HttpLocalizedOperationResult
@@ -55,6 +56,9 @@ class ElasticProfileControllerV2Test implements SecurityServiceTrait, Controller
   @Mock
   private EntityHashingService entityHashingService
 
+  @Mock
+  private ClusterProfilesService clusterProfileService
+
   @BeforeEach
   void setup() {
     initMocks(this)
@@ -62,7 +66,7 @@ class ElasticProfileControllerV2Test implements SecurityServiceTrait, Controller
 
   @Override
   ElasticProfileControllerV2 createControllerInstance() {
-    return new ElasticProfileControllerV2(elasticProfileService, new ApiAuthenticationHelper(securityService, goConfigService), entityHashingService)
+    return new ElasticProfileControllerV2(elasticProfileService, new ApiAuthenticationHelper(securityService, goConfigService), entityHashingService, clusterProfileService)
   }
 
   @Nested
@@ -245,7 +249,6 @@ class ElasticProfileControllerV2Test implements SecurityServiceTrait, Controller
       void 'should not create elastic profile in case of validation error and return the profile with errors'() {
         def jsonPayload = [
           id                : 'docker',
-          plugin_id         : 'cd.go.docker',
           cluster_profile_id: "prod-cluster",
           properties        : [
             [
