@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import classnames from "classnames";
+import {bind} from "classnames/bind";
 import {MithrilViewComponent} from "jsx/mithril-component";
 import * as _ from "lodash";
 import * as m from "mithril";
@@ -23,6 +23,8 @@ import * as styles from "./index.scss";
 import {ModalManager} from "./modal_manager";
 
 const uuid4 = require("uuid/v4");
+
+const classnames = bind(styles);
 
 //todo: Remove extraLargeHackForEAProfiles once we fix plugins view to provide the modal container dimensions
 export enum Size {small, medium, large, extraLargeHackForEaProfiles}
@@ -75,6 +77,7 @@ export abstract class Modal extends MithrilViewComponent<any> {
 
   view() {
     const spinner = this.isLoading() ? (<Spinner/>) : null;
+    console.log(classnames(styles.overlay, Size[this.size]));
     return <div class={classnames(styles.overlay, Size[this.size])}>
       <header class={styles.overlayHeader}>
         <h3 data-test-id="modal-title">{this.title()}</h3>
