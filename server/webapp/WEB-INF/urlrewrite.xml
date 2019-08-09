@@ -36,6 +36,12 @@
   </rule>
 
   <rule>
+    <name>pipeline_configs UI</name>
+    <from>^/admin/pipeline_configs/(.*)$</from>
+    <to last="true">/spark/admin/pipeline_configs</to>
+  </rule>
+
+  <rule>
     <name>Mailhost API</name>
     <from>^/api/config/mailserver(/?)$</from>
     <to last="true">/spark/api/config/mailserver</to>
