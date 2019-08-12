@@ -22,6 +22,7 @@ export class PipelineSettingsModal extends Modal {
 
   constructor() {
     super(Size.large);
+    this.closeModalOnOverlayClick = false;
   }
 
   body(): m.Children {
@@ -38,5 +39,4 @@ export class PipelineSettingsModal extends Modal {
   title(): string {
     return "Pipeline Settings";
   }
-
 }

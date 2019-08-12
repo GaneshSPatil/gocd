@@ -40,7 +40,7 @@ export class StagesWidget extends MithrilViewComponent<Attrs> {
           <div style="display: flex; justify-content:space-around">
             <ConceptDiagram image={stageImg}>
               A <strong>stage</strong> is a group of jobs, and a <strong>job</strong> is a piece of work to execute.
-            </ConceptDiagram>,
+            </ConceptDiagram>
             <ConceptDiagram image={jobImg}>
               A <strong>job</strong> is like a script, where each sequential step is called a <strong>task</strong>.
               Typically, a task is a single command.

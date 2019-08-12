@@ -37,6 +37,7 @@ export abstract class Modal extends MithrilViewComponent<any> {
   public id: string;
   private readonly size: Size;
   protected closeModalOnOverlayClick: boolean = true;
+  protected shouldCloseOnEscape: boolean      = true;
   protected modalState                        = ModalState.OK;
 
   protected constructor(size = Size.medium) {
@@ -62,6 +63,9 @@ export abstract class Modal extends MithrilViewComponent<any> {
   }
 
   closeOnEscape(e: KeyboardEvent) {
+    if (!this.shouldCloseOnEscape) {
+      return;
+    }
     if (e.key === "Escape") {
       this.close();
     }

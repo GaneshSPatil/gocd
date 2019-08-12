@@ -70,6 +70,18 @@ describe("Modal", () => {
     testModal.close();
   });
 
+  it("should not close modal on escape key when set to false", () => {
+    const testModal = aModal(false);
+
+    testModal.render();
+
+    const modalSelector = `.${styles.overlayHeader} h3`;
+    expect($(modalSelector)).toBeInDOM();
+    simulateEvent.simulate($(modalSelector).get(0), "keydown", {key: "Escape", keyCode: 27});
+    expect($(modalSelector)).toBeInDOM();
+    testModal.close();
+  });
+
   it("should render an OK button by default when no buttons are supplied", () => {
     const testModal = aModal();
 
@@ -108,10 +120,11 @@ describe("Modal", () => {
     testModal.close();
   });
 
-  function aModal() {
+  function aModal(shouldCloseOnEscape: boolean = true) {
     return new (class TestModal extends Modal {
       constructor() {
         super();
+        this.shouldCloseOnEscape = shouldCloseOnEscape;
       }
 
       body(): m.Children {
