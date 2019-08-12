@@ -18,7 +18,7 @@ import {MithrilViewComponent} from "jsx/mithril-component";
 import _ = require("lodash");
 import * as m from "mithril";
 import {PipelineConfig} from "models/pipeline_configs/pipeline_config";
-import {TextField} from "views/components/forms/input_fields";
+import {IdentifierInputField} from "views/components/forms/common_validating_inputs";
 import * as iconStyles from "views/components/icons/index.scss";
 import {CollapsiblePanel} from "views/components/collapsible_panel";
 import * as styles from "views/pages/pipeline_configs/index.scss";
@@ -41,16 +41,16 @@ export class PipelineConfigsWidget extends MithrilViewComponent<Attrs> {
                         actions={<i className={iconStyles.settings}/>}
                         expanded={expandedPipelinePanel}>
         <div style="display: flex">
-          <TextField required={true}
+          <IdentifierInputField required={true}
                      helpText="No spaces. Only letters, numbers, hyphens, underscores and period. Max 255 chars"
                      label="Pipeline name"
+                     placeholder="e.g. build-and-deploy"
                      property={vnode.attrs.pipelineConfig.name}/>
           <div style="display:flex">
             <ConceptDiagram image={pipelineImg}/>
             <div style="align-self: center;width: 350px">
-              In GoCD, a <strong>pipeline</strong> is a representation of a <strong>workflow</strong>. Pipelines consist
-              of
-              one or more <strong>stages</strong>.
+              In GoCD, a <strong>pipeline</strong> is a representation of a <strong>workflow</strong>.
+              Pipelines consists of one or more <strong>stages</strong>.
             </div>
           </div>
         </div>
