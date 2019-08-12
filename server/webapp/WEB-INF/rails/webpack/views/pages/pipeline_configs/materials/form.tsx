@@ -1,0 +1,49 @@
+/*
+ * Copyright 2019 ThoughtWorks, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {Material} from "models/materials/types";
+import * as Buttons from "views/components/buttons";
+import {Modal, Size} from "views/components/modal";
+import * as m from "mithril";
+import * as _ from "lodash";
+import {MaterialEditor} from "views/pages/pipelines/material_editor";
+
+export class MaterialModal extends Modal {
+  private readonly material: Material;
+
+  constructor(material: Material) {
+    super(Size.large);
+    this.material = material;
+  }
+
+  body(): m.Children {
+    return <MaterialEditor material={this.material}/>;
+  }
+
+  title(): string {
+    if (_.isEmpty(this.material.attributes()) || _.isEmpty(this.material.attributes().name())) {
+      return "Add material";
+    }
+    return this.material.attributes().name();
+  }
+
+  buttons(): m.ChildArray {
+    return [
+      <Buttons.Primary data-test-id="button-ok" onclick={this.close.bind(this)}>Add</Buttons.Primary>,
+      <Buttons.Secondary>Check connection</Buttons.Secondary>
+    ];
+  }
+}

@@ -234,14 +234,17 @@ class AuthNotSetInUrlAndUserPassFieldsValidator extends Validator {
 export class GitMaterialAttributes extends ScmMaterialAttributes {
   url: Stream<string | undefined>;
   branch: Stream<string | undefined>;
+  shallowClone: Stream<boolean>;
 
   constructor(name?: string, autoUpdate?: boolean, url?: string, branch?: string,
               username?: string,
               password?: string,
-              encryptedPassword?: string) {
+              encryptedPassword?: string,
+              shallowClone?: boolean) {
     super(name, autoUpdate, username, password, encryptedPassword);
     this.url    = Stream(url);
     this.branch = Stream(branch);
+    this.shallowClone = Stream(shallowClone);
 
     this.validatePresenceOf("url");
     this.validateWith(new AuthNotSetInUrlAndUserPassFieldsValidator(), "url");

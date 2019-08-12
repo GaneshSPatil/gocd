@@ -25,6 +25,7 @@ import * as styles from "views/pages/pipeline_configs/index.scss";
 import {MaterialsWidget} from "views/pages/pipeline_configs/materials";
 import {StagesWidget} from "views/pages/pipeline_configs/stages";
 import {ConceptDiagram} from "views/pages/pipelines/concept_diagram";
+import * as _ from "lodash"
 
 interface Attrs {
   pipelineConfig: PipelineConfig
@@ -38,7 +39,6 @@ export class PipelineConfigsWidget extends MithrilViewComponent<Attrs> {
     const expandedPipelinePanel = _.isEmpty(vnode.attrs.pipelineConfig.name());
     const pipelineLevelSettings = <Icons.Settings onclick={vnode.attrs.onPipelineSettingsEdit.bind(vnode.attrs)}/>;
     return <div>
-      <MaterialsWidget/>
       <CollapsiblePanel header={<div className={styles.headerText}>Pipelines</div>}
                         actions={pipelineLevelSettings}
                         expanded={expandedPipelinePanel}>
@@ -57,6 +57,7 @@ export class PipelineConfigsWidget extends MithrilViewComponent<Attrs> {
           </div>
         </div>
       </CollapsiblePanel>
+      <MaterialsWidget/>
       <StagesWidget stages={vnode.attrs.pipelineConfig.stages()}/>
     </div>;
   }

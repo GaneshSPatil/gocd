@@ -16,11 +16,12 @@
 
 import {MithrilViewComponent} from "jsx/mithril-component";
 import * as m from "mithril";
-import {Materials} from "models/materials/types";
+import {GitMaterialAttributes, Material, Materials} from "models/materials/types";
 import {Secondary} from "views/components/buttons";
 import {CollapsiblePanel} from "views/components/collapsible_panel";
 import * as styles from "views/pages/pipeline_configs/index.scss";
 import * as _ from "lodash";
+import {MaterialModal} from "views/pages/pipeline_configs/materials/form";
 import {ConceptDiagram} from "views/pages/pipelines/concept_diagram";
 
 interface Attrs {
@@ -36,7 +37,7 @@ export class MaterialsWidget extends MithrilViewComponent<Attrs> {
     if (_.isEmpty(vnode.attrs) || _.isEmpty(vnode.attrs.materials)) {
       expanded  = true;
       materials =
-        [<ConceptDiagram image={materialImg} />,
+        [<ConceptDiagram image={materialImg}/>,
           <div style="align-self: center;width: 350px">
             A <strong>material</strong> triggers your pipeline to run.
             Typically this is a <strong>source repository</strong> or an <strong>upstream pipeline</strong>.
@@ -46,11 +47,16 @@ export class MaterialsWidget extends MithrilViewComponent<Attrs> {
     }
 
     return <CollapsiblePanel header={<div class={styles.headerText}>Materials</div>}
-                             actions={<Secondary>Add material</Secondary>}
+                             actions={<Secondary onclick={this.addMaterialModal}>Add material</Secondary>}
                              expanded={expanded}>
       <div class={styles.collapsibleContent}>
         {materials}
       </div>
     </CollapsiblePanel>;
+  }
+
+  addMaterialModal(e: MouseEvent) {
+    new MaterialModal(new Material("git", new GitMaterialAttributes())).render();
+    e.stopPropagation();
   }
 }
