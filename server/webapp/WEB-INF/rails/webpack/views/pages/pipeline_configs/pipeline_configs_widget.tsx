@@ -15,11 +15,11 @@
  */
 
 import {MithrilViewComponent} from "jsx/mithril-component";
-import _ = require("lodash");
+import * as _ from "lodash";
 import * as m from "mithril";
 import {PipelineConfig} from "models/pipeline_configs/pipeline_config";
 import {IdentifierInputField} from "views/components/forms/common_validating_inputs";
-import * as iconStyles from "views/components/icons/index.scss";
+import * as Icons from "views/components/icons";
 import {CollapsiblePanel} from "views/components/collapsible_panel";
 import * as styles from "views/pages/pipeline_configs/index.scss";
 import {MaterialsWidget} from "views/pages/pipeline_configs/materials";
@@ -28,6 +28,7 @@ import {ConceptDiagram} from "views/pages/pipelines/concept_diagram";
 
 interface Attrs {
   pipelineConfig: PipelineConfig
+  onPipelineSettingsEdit: (e: Event) => void;
 }
 
 const pipelineImg = require("../../../../app/assets/images/concept_diagrams/concept_pipeline.svg");
@@ -35,10 +36,11 @@ const pipelineImg = require("../../../../app/assets/images/concept_diagrams/conc
 export class PipelineConfigsWidget extends MithrilViewComponent<Attrs> {
   view(vnode: m.Vnode<Attrs>) {
     const expandedPipelinePanel = _.isEmpty(vnode.attrs.pipelineConfig.name());
+    const pipelineLevelSettings = <Icons.Settings onclick={vnode.attrs.onPipelineSettingsEdit.bind(vnode.attrs)}/>;
     return <div>
       <MaterialsWidget/>
       <CollapsiblePanel header={<div className={styles.headerText}>Pipelines</div>}
-                        actions={<i className={iconStyles.settings}/>}
+                        actions={pipelineLevelSettings}
                         expanded={expandedPipelinePanel}>
         <div style="display: flex">
           <IdentifierInputField required={true}

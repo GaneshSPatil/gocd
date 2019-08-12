@@ -16,6 +16,7 @@
 
 import * as m from "mithril";
 import {PipelineConfig} from "models/pipeline_configs/pipeline_config";
+import {PipelineSettingsModal} from "views/pages/pipeline_configs/pipeline_settings_modal";
 import {PipelineConfigsWidget} from "views/pages/pipeline_configs/pipeline_configs_widget";
 import {Page} from "views/pages/page";
 
@@ -25,7 +26,8 @@ interface State {
 
 export class PipelineConfigsPage extends Page<null, State> {
   componentToDisplay(vnode: m.Vnode<null, State>): m.Children {
-    return <PipelineConfigsWidget pipelineConfig={vnode.state.dummy}/>;
+    return <PipelineConfigsWidget pipelineConfig={vnode.state.dummy}
+                                  onPipelineSettingsEdit={this.showPipelineSettings}/>;
   }
 
   pageName(): string {
@@ -35,7 +37,12 @@ export class PipelineConfigsPage extends Page<null, State> {
   fetchData(vnode: m.Vnode<null, State>): Promise<any> {
     // to be implemented
     const pipelineConfig = new PipelineConfig("", [], []);
-    vnode.state.dummy = pipelineConfig;
+    vnode.state.dummy    = pipelineConfig;
     return Promise.resolve(pipelineConfig);
+  }
+
+  showPipelineSettings(e: Event) {
+    e.stopPropagation();
+    new PipelineSettingsModal().render();
   }
 }
