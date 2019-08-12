@@ -15,6 +15,7 @@
  */
 
 import {MithrilViewComponent} from "jsx/mithril-component";
+import _ = require("lodash");
 import * as m from "mithril";
 import {PipelineConfig} from "models/pipeline_configs/pipeline_config";
 import {TextField} from "views/components/forms/input_fields";
