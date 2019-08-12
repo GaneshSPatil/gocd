@@ -6,3 +6,4 @@ export const panelContent: string;
 export const headerText: string;
 export const conceptDiagramExplanation: string;
 export const collapsibleContent: string;
+export const textAlignRight: string;

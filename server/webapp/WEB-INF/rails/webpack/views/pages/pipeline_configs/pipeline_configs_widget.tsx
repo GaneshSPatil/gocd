@@ -15,7 +15,6 @@
  */
 
 import {MithrilViewComponent} from "jsx/mithril-component";
-import * as _ from "lodash";
 import * as m from "mithril";
 import {PipelineConfig} from "models/pipeline_configs/pipeline_config";
 import {IdentifierInputField} from "views/components/forms/common_validating_inputs";
@@ -25,11 +24,12 @@ import * as styles from "views/pages/pipeline_configs/index.scss";
 import {MaterialsWidget} from "views/pages/pipeline_configs/materials";
 import {StagesWidget} from "views/pages/pipeline_configs/stages";
 import {ConceptDiagram} from "views/pages/pipelines/concept_diagram";
-import * as _ from "lodash"
+import * as _ from "lodash";
 
 interface Attrs {
-  pipelineConfig: PipelineConfig
+  pipelineConfig: PipelineConfig;
   onPipelineSettingsEdit: (e: Event) => void;
+  onMaterialAdd: Function;
 }
 
 const pipelineImg = require("../../../../app/assets/images/concept_diagrams/concept_pipeline.svg");
@@ -57,7 +57,7 @@ export class PipelineConfigsWidget extends MithrilViewComponent<Attrs> {
           </div>
         </div>
       </CollapsiblePanel>
-      <MaterialsWidget/>
+      <MaterialsWidget onMaterialAdd={vnode.attrs.onMaterialAdd} materials={vnode.attrs.pipelineConfig.materials()}/>
       <StagesWidget stages={vnode.attrs.pipelineConfig.stages()}/>
     </div>;
   }

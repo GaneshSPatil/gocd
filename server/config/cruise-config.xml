@@ -31,13 +31,40 @@
     </authorization>
     <pipeline name="up42">
       <materials>
-        <git url="test-repo" />
+        <git url="http://googlr.com" dest="sdf" materialName="google" />
+        <p4 port="asASD" dest="ASDASD">
+          <view><![CDATA[ASDADAD]]></view>
+        </p4>
+        <pipeline pipelineName="test" stageName="ABCD" />
       </materials>
       <stage name="up42_stage">
         <jobs>
           <job name="up42_job">
             <tasks>
               <exec command="ls" />
+            </tasks>
+          </job>
+        </jobs>
+      </stage>
+    </pipeline>
+    <pipeline name="test">
+      <materials>
+        <git url="https://github.com/vrushaliwaykole/test-something" />
+      </materials>
+      <stage name="test">
+        <jobs>
+          <job name="abcd">
+            <tasks>
+              <exec command="ls" />
+            </tasks>
+          </job>
+        </jobs>
+      </stage>
+      <stage name="ABCD">
+        <jobs>
+          <job name="A">
+            <tasks>
+              <ant />
             </tasks>
           </job>
         </jobs>

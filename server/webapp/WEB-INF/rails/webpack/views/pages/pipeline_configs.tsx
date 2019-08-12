@@ -15,19 +15,26 @@
  */
 
 import * as m from "mithril";
+import {Material} from "models/materials/types";
 import {PipelineConfig} from "models/pipeline_configs/pipeline_config";
 import {PipelineSettingsModal} from "views/pages/pipeline_configs/pipeline_settings_modal";
 import {PipelineConfigsWidget} from "views/pages/pipeline_configs/pipeline_configs_widget";
 import {Page} from "views/pages/page";
 
 interface State {
-  dummy: PipelineConfig;
+  pipelineConfig: PipelineConfig;
+  onMaterialAdd: Function,
 }
 
 export class PipelineConfigsPage extends Page<null, State> {
   componentToDisplay(vnode: m.Vnode<null, State>): m.Children {
-    return <PipelineConfigsWidget pipelineConfig={vnode.state.dummy}
-                                  onPipelineSettingsEdit={this.showPipelineSettings}/>;
+    vnode.state.onMaterialAdd = function (material: Material) {
+      vnode.state.pipelineConfig.materials().add(material);
+      m.redraw();
+    };
+    return <PipelineConfigsWidget pipelineConfig={vnode.state.pipelineConfig}
+                                  onMaterialAdd={vnode.state.onMaterialAdd}
+    onPipelineSettingsEdit={this.showPipelineSettings}/>;
   }
 
   pageName(): string {
@@ -36,9 +43,8 @@ export class PipelineConfigsPage extends Page<null, State> {
 
   fetchData(vnode: m.Vnode<null, State>): Promise<any> {
     // to be implemented
-    const pipelineConfig = new PipelineConfig("", [], []);
-    vnode.state.dummy    = pipelineConfig;
-    return Promise.resolve(pipelineConfig);
+    vnode.state.pipelineConfig = new PipelineConfig("", [], []);
+    return Promise.resolve();
   }
 
   showPipelineSettings(e: Event) {

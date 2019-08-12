@@ -54,7 +54,7 @@ abstract class ScmFields extends MithrilViewComponent<Attrs> {
           " ",
           <Tooltip.Help size={TooltipSize.medium} content={DESTINATION_DIR_HELP_MESSAGE}/>
         ]} property={mattrs.destination} errorText={this.errs(mattrs, "destination")}/>
-        <TextField label="Material Name" helpText={IDENTIFIER_FORMAT_HELP_MESSAGE} placeholder="A human-friendly label for this material" property={mattrs.name} errorText={this.errs(mattrs, "name")}/>
+        <TextField label="Material Name" helpText={IDENTIFIER_FORMAT_HELP_MESSAGE} placeholder="A human-friendly label for this material" property={mattrs.materialName} errorText={this.errs(mattrs, "name")}/>
       </AdvancedSettings>
     ];
   }

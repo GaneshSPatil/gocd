@@ -143,12 +143,14 @@ export class Material extends ValidatableMixin {
 
 export abstract class MaterialAttributes extends ValidatableMixin {
   name: Stream<string | undefined>;
+  materialName: Stream<string | undefined>;
   autoUpdate: Stream<boolean | undefined>;
 
   protected constructor(name?: string, autoUpdate?: boolean) {
     super();
-    this.name       = Stream(name);
-    this.autoUpdate = Stream(autoUpdate);
+    this.name         = Stream(name);
+    this.autoUpdate   = Stream(autoUpdate);
+    this.materialName = Stream(name);
     this.validateIdFormat("name");
   }
 
@@ -186,6 +188,11 @@ export abstract class MaterialAttributes extends ValidatableMixin {
         return _.assign({}, serialized, {encrypted_password: password().value()});
       }
     }
+
+    delete serialized.name;
+    delete serialized.materialName;
+
+    serialized.name(this.materialName());
 
     return serialized;
   }
@@ -242,9 +249,13 @@ export class GitMaterialAttributes extends ScmMaterialAttributes {
               encryptedPassword?: string,
               shallowClone?: boolean) {
     super(name, autoUpdate, username, password, encryptedPassword);
-    this.url    = Stream(url);
-    this.branch = Stream(branch);
+    this.url          = Stream(url);
+    this.branch       = Stream(branch);
     this.shallowClone = Stream(shallowClone);
+
+    if (_.isEmpty(name)) {
+      this.name(url ? url : "");
+    }
 
     this.validatePresenceOf("url");
     this.validateWith(new AuthNotSetInUrlAndUserPassFieldsValidator(), "url");
@@ -282,6 +293,9 @@ export class SvnMaterialAttributes extends ScmMaterialAttributes {
     super(name, autoUpdate, username, password, encryptedPassword);
     this.url            = Stream(url);
     this.checkExternals = Stream(checkExternals);
+    if (_.isEmpty(name)) {
+      this.name(url ? url : "");
+    }
 
     this.validatePresenceOf("url");
   }
@@ -316,6 +330,9 @@ export class HgMaterialAttributes extends ScmMaterialAttributes {
     super(name, autoUpdate, username, password, encryptedPassword);
     this.url    = Stream(url);
     this.branch = Stream(branch);
+    if (_.isEmpty(name)) {
+      this.name(url ? url : "");
+    }
 
     this.validatePresenceOf("url");
     this.validateWith(new AuthNotSetInUrlAndUserPassFieldsValidator(), "url");
@@ -356,6 +373,9 @@ export class P4MaterialAttributes extends ScmMaterialAttributes {
     this.port       = Stream(port);
     this.useTickets = Stream(useTickets);
     this.view       = Stream(view);
+    if (_.isEmpty(name)) {
+      this.name(port ? port : "");
+    }
 
     this.validatePresenceOf("view");
     this.validatePresenceOf("port", {message: ErrorMessages.mustBePresent("Host and Port")});
@@ -399,6 +419,10 @@ export class TfsMaterialAttributes extends ScmMaterialAttributes {
     this.domain      = Stream(domain);
     this.projectPath = Stream(projectPath);
 
+    if (_.isEmpty(name)) {
+      this.name(url ? url : "");
+    }
+
     this.validatePresenceOf("url");
     this.validatePresenceOf("projectPath");
     this.validatePresenceOf("username");
@@ -432,6 +456,10 @@ export class DependencyMaterialAttributes extends MaterialAttributes {
     super(name, autoUpdate);
     this.pipeline = Stream(pipeline);
     this.stage    = Stream(stage);
+
+    if (_.isEmpty(name)) {
+      this.name(pipeline ? pipeline : "");
+    }
 
     this.validatePresenceOf("pipeline");
     this.validatePresenceOf("stage");

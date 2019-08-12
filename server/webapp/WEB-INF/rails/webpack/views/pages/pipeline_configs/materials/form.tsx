@@ -21,12 +21,14 @@ import * as m from "mithril";
 import * as _ from "lodash";
 import {MaterialEditor} from "views/pages/pipelines/material_editor";
 
-export class MaterialModal extends Modal {
+export class AddMaterialModal extends Modal {
   private readonly material: Material;
+  private readonly onSuccessfulAdd: Function;
 
-  constructor(material: Material) {
+  constructor(material: Material, onSuccessfulAdd: Function) {
     super(Size.large);
     this.material = material;
+    this.onSuccessfulAdd= onSuccessfulAdd;
   }
 
   body(): m.Children {
@@ -42,8 +44,40 @@ export class MaterialModal extends Modal {
 
   buttons(): m.ChildArray {
     return [
-      <Buttons.Primary data-test-id="button-ok" onclick={this.close.bind(this)}>Add</Buttons.Primary>,
+      <Buttons.Primary data-test-id="button-ok" onclick={() => {
+        this.close();
+        this.onSuccessfulAdd(this.material);
+      }} >Add</Buttons.Primary>,
       <Buttons.Secondary>Check connection</Buttons.Secondary>
+    ];
+  }
+}
+
+
+export class UpdateMaterialModal extends Modal {
+  private readonly material: Material;
+  private readonly onSuccessfulUpdate: Function;
+
+  constructor(material: Material, onSuccessfulUpdate: Function) {
+    super(Size.large);
+    this.material = material;
+    this.onSuccessfulUpdate= onSuccessfulUpdate;
+  }
+
+  body(): m.Children {
+    return <MaterialEditor material={this.material}/>;
+  }
+
+  title(): string {
+    return this.material.name();
+  }
+
+  buttons(): m.ChildArray {
+    return [
+      <Buttons.Primary data-test-id="button-ok" onclick={() => {
+        this.close();
+        this.onSuccessfulUpdate(this.material);
+      }} >Update</Buttons.Primary>
     ];
   }
 }

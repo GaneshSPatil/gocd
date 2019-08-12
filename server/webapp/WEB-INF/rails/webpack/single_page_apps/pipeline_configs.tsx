@@ -16,7 +16,6 @@
 
 import Page from "helpers/spa_base";
 import {PipelineConfigsPage} from "views/pages/pipeline_configs";
-import * as m from 'mithril';
 
 export class PipelineConfigsSPA extends Page {
   constructor() {
@@ -26,24 +25,3 @@ export class PipelineConfigsSPA extends Page {
 
 //tslint:disable-next-line
 new PipelineConfigsSPA();
-
-document.addEventListener("DOMContentLoaded", function(event) {
-  m.route(document.body, 'abcd', {
-    abcd: {
-      view: function () {
-        return "hi"
-      }
-    },
-    '/:pipeline_name':        {
-      view: function () {
-        return "kjxfndksjf"
-      }
-    },
-    '':                         {
-      view: function () {
-        return "sdfsdf"
-      }
-    },
-  });
-});
-

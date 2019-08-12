@@ -57,6 +57,7 @@ export interface P4MaterialAttributesJSON extends ScmAttributesJSON {
   port: string;
   use_tickets: boolean;
   view: string;
+  server_and_port: string;
 }
 
 export interface TfsMaterialAttributesJSON extends ScmAttributesJSON {

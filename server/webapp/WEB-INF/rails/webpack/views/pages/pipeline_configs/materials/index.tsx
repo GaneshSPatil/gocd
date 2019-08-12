@@ -16,16 +16,21 @@
 
 import {MithrilViewComponent} from "jsx/mithril-component";
 import * as m from "mithril";
-import {GitMaterialAttributes, Material, Materials} from "models/materials/types";
+import {GitMaterialAttributes, Material} from "models/materials/types";
+import {NameableSet} from "models/pipeline_configs/nameable_set";
 import {Secondary} from "views/components/buttons";
 import {CollapsiblePanel} from "views/components/collapsible_panel";
+import {IconGroup} from "views/components/icons/index";
+import * as Icons from "views/components/icons/index";
 import * as styles from "views/pages/pipeline_configs/index.scss";
 import * as _ from "lodash";
-import {MaterialModal} from "views/pages/pipeline_configs/materials/form";
+import {AddMaterialModal, UpdateMaterialModal} from "views/pages/pipeline_configs/materials/form";
 import {ConceptDiagram} from "views/pages/pipelines/concept_diagram";
+import * as tableStyles from "views/components/table/index.scss";
 
 interface Attrs {
-  materials?: Materials;
+  materials: NameableSet<Material>;
+  onMaterialAdd: any;
 }
 
 const materialImg = require("../../../../../app/assets/images/concept_diagrams/concept_material.svg");
@@ -33,8 +38,8 @@ const materialImg = require("../../../../../app/assets/images/concept_diagrams/c
 export class MaterialsWidget extends MithrilViewComponent<Attrs> {
   view(vnode: m.Vnode<Attrs>) {
     let materials = [];
-    let expanded  = false;
-    if (_.isEmpty(vnode.attrs) || _.isEmpty(vnode.attrs.materials)) {
+    let expanded  = true;
+    if (_.isEmpty(vnode.attrs) || _.isEmpty(vnode.attrs.materials) || vnode.attrs.materials.length == 0) {
       expanded  = true;
       materials =
         [<ConceptDiagram image={materialImg}/>,
@@ -43,11 +48,22 @@ export class MaterialsWidget extends MithrilViewComponent<Attrs> {
             Typically this is a <strong>source repository</strong> or an <strong>upstream pipeline</strong>.
           </div>];
     } else {
-      materials = ["test"];
+      materials = [<table className={tableStyles.table} data-test-id={"materials-index-table"}>
+        <thead data-test-id="table-header">
+        <tr data-test-id="table-header-row">
+          <th>Material Name</th>
+          <th>Type</th>
+          <th>Url</th>
+          <th></th>
+        </tr>
+        </thead>
+        {this.materialsData(vnode)}
+      </table>];
     }
 
     return <CollapsiblePanel header={<div class={styles.headerText}>Materials</div>}
-                             actions={<Secondary onclick={this.addMaterialModal}>Add material</Secondary>}
+                             actions={<Secondary onclick={(e: MouseEvent) => this.addMaterialModal(e, vnode)}>Add
+                               material</Secondary>}
                              expanded={expanded}>
       <div class={styles.collapsibleContent}>
         {materials}
@@ -55,8 +71,47 @@ export class MaterialsWidget extends MithrilViewComponent<Attrs> {
     </CollapsiblePanel>;
   }
 
-  addMaterialModal(e: MouseEvent) {
-    new MaterialModal(new Material("git", new GitMaterialAttributes())).render();
+  materialsData(vnode: m.Vnode<Attrs>): any {
+    let tbodyContent = Array<any>();
+    vnode.attrs.materials.forEach(material => {
+      let materialContent = Array<any>();
+      materialContent.push(<td>{material.name()}</td>);
+      materialContent.push(<td>{this.getTypeForDisplay(material.type())}</td>);
+      materialContent.push(<td>{material.materialUrl()}</td>);
+      materialContent.push(<td class={styles.textAlignRight}>
+        <IconGroup>
+          <Icons.Edit onclick={() => this.editMaterialModal(material, vnode)}/>
+          <Icons.Delete/>
+        </IconGroup>
+      </td>);
+      tbodyContent.push(<tr>{materialContent}</tr>)
+    });
+    return <tbody>{tbodyContent}</tbody>;
+  }
+
+  getTypeForDisplay(type: string) {
+    switch (type) {
+      case "git":
+        return "Git";
+      case "hg":
+        return "Mercurial";
+      case "svn":
+        return "Subversion";
+      case "p4":
+        return "Perforce";
+      case "tfs":
+        return "Team Foundation Server";
+      case "dependency":
+        return "Another Pipeline";
+    }
+  }
+
+  addMaterialModal(e: MouseEvent, vnode: m.Vnode<Attrs>) {
+    new AddMaterialModal(new Material("git", new GitMaterialAttributes()), vnode.attrs.onMaterialAdd).render();
     e.stopPropagation();
+  }
+
+  editMaterialModal(material: Material, vnode: m.Vnode<Attrs>) {
+    new UpdateMaterialModal(material, vnode.attrs.onMaterialAdd).render();
   }
 }
