@@ -16,12 +16,13 @@
 
 import {MithrilViewComponent} from "jsx/mithril-component";
 import * as m from "mithril";
-import {GitMaterialAttributes, Material} from "models/materials/types";
+import {GitMaterialAttributes, Material, MaterialAttributes} from "models/materials/types";
 import {NameableSet} from "models/pipeline_configs/nameable_set";
 import {Secondary} from "views/components/buttons";
 import {CollapsiblePanel} from "views/components/collapsible_panel";
 import {IconGroup} from "views/components/icons/index";
 import * as Icons from "views/components/icons/index";
+import {MaterialOperations} from "views/pages/pipeline_configs";
 import * as styles from "views/pages/pipeline_configs/index.scss";
 import * as _ from "lodash";
 import {AddMaterialModal, UpdateMaterialModal} from "views/pages/pipeline_configs/materials/form";
@@ -30,7 +31,7 @@ import * as tableStyles from "views/components/table/index.scss";
 
 interface Attrs {
   materials: NameableSet<Material>;
-  onMaterialAdd: any;
+  materialOperations: MaterialOperations;
 }
 
 const materialImg = require("../../../../../app/assets/images/concept_diagrams/concept_material.svg");
@@ -81,10 +82,10 @@ export class MaterialsWidget extends MithrilViewComponent<Attrs> {
       materialContent.push(<td class={styles.textAlignRight}>
         <IconGroup>
           <Icons.Edit onclick={() => this.editMaterialModal(material, vnode)}/>
-          <Icons.Delete/>
+          <Icons.Delete onclick={() => vnode.attrs.materialOperations.onDelete(material)}/>
         </IconGroup>
       </td>);
-      tbodyContent.push(<tr>{materialContent}</tr>)
+      tbodyContent.push(<tr>{materialContent}</tr>);
     });
     return <tbody>{tbodyContent}</tbody>;
   }
@@ -107,11 +108,13 @@ export class MaterialsWidget extends MithrilViewComponent<Attrs> {
   }
 
   addMaterialModal(e: MouseEvent, vnode: m.Vnode<Attrs>) {
-    new AddMaterialModal(new Material("git", new GitMaterialAttributes()), vnode.attrs.onMaterialAdd).render();
+    new AddMaterialModal(new Material("git", new GitMaterialAttributes()), vnode.attrs.materialOperations.onAdd).render();
     e.stopPropagation();
   }
 
   editMaterialModal(material: Material, vnode: m.Vnode<Attrs>) {
-    new UpdateMaterialModal(material, vnode.attrs.onMaterialAdd).render();
+    const clonedMaterial = new Material(material.type(),
+                                        MaterialAttributes.clone(material.type(), material.attributes()));
+    new UpdateMaterialModal(clonedMaterial, vnode.attrs.materialOperations.onUpdate).render();
   }
 }

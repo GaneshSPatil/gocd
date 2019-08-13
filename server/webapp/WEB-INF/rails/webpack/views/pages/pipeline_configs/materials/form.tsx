@@ -19,7 +19,16 @@ import * as Buttons from "views/components/buttons";
 import {Modal, Size} from "views/components/modal";
 import * as m from "mithril";
 import * as _ from "lodash";
-import {MaterialEditor} from "views/pages/pipelines/material_editor";
+import {MaterialEditor} from "views/pages/pipeline_configs/materials/material_editor";
+
+export const SUPPORTED_MATERIALS = [
+  {id: "git", text: "Git"},
+  {id: "hg", text: "Mercurial"},
+  {id: "svn", text: "Subversion"},
+  {id: "p4", text: "Perforce"},
+  {id: "tfs", text: "Team Foundation Server"},
+  {id: "dependency", text: "Another Pipeline"},
+];
 
 export class AddMaterialModal extends Modal {
   private readonly material: Material;
@@ -27,8 +36,8 @@ export class AddMaterialModal extends Modal {
 
   constructor(material: Material, onSuccessfulAdd: Function) {
     super(Size.large);
-    this.material = material;
-    this.onSuccessfulAdd= onSuccessfulAdd;
+    this.material        = material;
+    this.onSuccessfulAdd = onSuccessfulAdd;
   }
 
   body(): m.Children {
@@ -46,8 +55,13 @@ export class AddMaterialModal extends Modal {
     return [
       <Buttons.Primary data-test-id="button-ok" onclick={() => {
         this.close();
+        if (_.isEmpty(this.material.attributes().materialName())) {
+          this.material.attributes().name(this.material.materialUrl());
+        } else {
+          this.material.attributes().name(this.material.attributes().materialName());
+        }
         this.onSuccessfulAdd(this.material);
-      }} >Add</Buttons.Primary>,
+      }}>Add</Buttons.Primary>,
       <Buttons.Secondary>Check connection</Buttons.Secondary>
     ];
   }
@@ -60,8 +74,8 @@ export class UpdateMaterialModal extends Modal {
 
   constructor(material: Material, onSuccessfulUpdate: Function) {
     super(Size.large);
-    this.material = material;
-    this.onSuccessfulUpdate= onSuccessfulUpdate;
+    this.material           = material;
+    this.onSuccessfulUpdate = onSuccessfulUpdate;
   }
 
   body(): m.Children {
@@ -73,11 +87,17 @@ export class UpdateMaterialModal extends Modal {
   }
 
   buttons(): m.ChildArray {
+    let originalMaterialName = this.material.name();
     return [
       <Buttons.Primary data-test-id="button-ok" onclick={() => {
         this.close();
-        this.onSuccessfulUpdate(this.material);
-      }} >Update</Buttons.Primary>
+        if (_.isEmpty(this.material.attributes().materialName())) {
+          this.material.attributes().name(this.material.materialUrl());
+        } else {
+          this.material.attributes().name(this.material.attributes().materialName());
+        }
+        this.onSuccessfulUpdate(originalMaterialName, this.material);
+      }}>Update</Buttons.Primary>
     ];
   }
 }

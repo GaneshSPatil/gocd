@@ -20,21 +20,43 @@ import {PipelineConfig} from "models/pipeline_configs/pipeline_config";
 import {PipelineSettingsModal} from "views/pages/pipeline_configs/pipeline_settings_modal";
 import {PipelineConfigsWidget} from "views/pages/pipeline_configs/pipeline_configs_widget";
 import {Page} from "views/pages/page";
+import * as _ from "lodash";
+
+export interface MaterialOperations {
+  onAdd: (material: Material) => void;
+  onUpdate: (originalName: string, material: Material) => void;
+  onDelete: (material: Material) => void;
+}
 
 interface State {
   pipelineConfig: PipelineConfig;
-  onMaterialAdd: Function,
+  materialOperations: MaterialOperations;
 }
 
 export class PipelineConfigsPage extends Page<null, State> {
   componentToDisplay(vnode: m.Vnode<null, State>): m.Children {
-    vnode.state.onMaterialAdd = function (material: Material) {
-      vnode.state.pipelineConfig.materials().add(material);
-      m.redraw();
+    vnode.state.materialOperations = {
+      onAdd(material: Material) {
+        vnode.state.pipelineConfig.materials().add(material);
+        m.redraw();
+      },
+      onUpdate(originalName: string, material: Material) {
+        let oldMaterial = vnode.state.pipelineConfig.materials().get(name);
+        if (oldMaterial !== undefined && !_.isEmpty(oldMaterial)) {
+          vnode.state.pipelineConfig.materials().delete(oldMaterial);
+        }
+        vnode.state.pipelineConfig.materials().add(material);
+        m.redraw();
+      },
+      onDelete(material: Material) {
+        vnode.state.pipelineConfig.materials().delete(material);
+        m.redraw();
+      }
     };
+
     return <PipelineConfigsWidget pipelineConfig={vnode.state.pipelineConfig}
-                                  onMaterialAdd={vnode.state.onMaterialAdd}
-    onPipelineSettingsEdit={this.showPipelineSettings}/>;
+                                  materialOperations={vnode.state.materialOperations}
+                                  onPipelineSettingsEdit={this.showPipelineSettings}/>;
   }
 
   pageName(): string {

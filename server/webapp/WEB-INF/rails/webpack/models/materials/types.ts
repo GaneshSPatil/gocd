@@ -146,11 +146,11 @@ export abstract class MaterialAttributes extends ValidatableMixin {
   materialName: Stream<string | undefined>;
   autoUpdate: Stream<boolean | undefined>;
 
-  protected constructor(name?: string, autoUpdate?: boolean) {
+  protected constructor(materialName?: string, autoUpdate?: boolean) {
     super();
-    this.name         = Stream(name);
+    this.name         = Stream(materialName);
+    this.materialName = Stream(materialName);
     this.autoUpdate   = Stream(autoUpdate);
-    this.materialName = Stream(name);
     this.validateIdFormat("name");
   }
 
@@ -170,6 +170,25 @@ export abstract class MaterialAttributes extends ValidatableMixin {
         return DependencyMaterialAttributes.fromJSON(material.attributes as DependencyMaterialAttributesJSON);
       default:
         throw new Error(`Unknown material type ${material.type}`);
+    }
+  }
+
+  static clone(type: string, material: MaterialAttributes) {
+    switch (type) {
+      case "git":
+        return GitMaterialAttributes.fromGitMaterialAttribute(material as GitMaterialAttributes);
+      case "svn":
+        return SvnMaterialAttributes.fromSvnMaterialAttribute(material as SvnMaterialAttributes);
+      case "hg":
+        return HgMaterialAttributes.fromHgMaterialAttribute(material as HgMaterialAttributes);
+      case "p4":
+        return P4MaterialAttributes.fromP4MaterialAttribute(material as P4MaterialAttributes);
+      case "tfs":
+        return TfsMaterialAttributes.fromTfsMaterialAttribute(material as TfsMaterialAttributes);
+      case "dependency":
+        return DependencyMaterialAttributes.fromDependencyMaterialAttribute(material as DependencyMaterialAttributes);
+      default:
+        throw new Error(`Unknown material type ${type}`);
     }
   }
 
@@ -277,6 +296,33 @@ export class GitMaterialAttributes extends ScmMaterialAttributes {
     attrs.errors(new Errors(json.errors));
     return attrs;
   }
+
+  static fromGitMaterialAttribute(attributes: GitMaterialAttributes) {
+    const attrs = new GitMaterialAttributes(
+      attributes.materialName(),
+      attributes.autoUpdate(),
+      attributes.url(),
+      attributes.branch(),
+      attributes.username(),
+      attributes.password().isPlain() ? attributes.password().getOriginal() : "",
+      attributes.password().isSecure() ? attributes.password().getOriginal() : "",
+    );
+    if (undefined !== attributes.destination()) {
+      attrs.destination(attributes.destination());
+    }
+
+    if (_.isEmpty(attrs.name())) {
+      attrs.name(attrs.url());
+    }
+
+    const errors = attributes.errors().errors();
+    if (errors !== undefined) {
+      attrs.errors(new Errors(errors));
+    } else {
+      attrs.errors(new Errors());
+    }
+    return attrs;
+  }
 }
 
 export class SvnMaterialAttributes extends ScmMaterialAttributes {
@@ -316,6 +362,31 @@ export class SvnMaterialAttributes extends ScmMaterialAttributes {
     attrs.errors(new Errors(json.errors));
     return attrs;
   }
+
+  static fromSvnMaterialAttribute(attributes: SvnMaterialAttributes) {
+    const attrs = new SvnMaterialAttributes(
+      attributes.materialName(),
+      attributes.autoUpdate(),
+      attributes.url(),
+      attributes.checkExternals(),
+      attributes.username(),
+      attributes.password().isPlain() ? attributes.password().getOriginal() : "",
+      attributes.password().isSecure() ? attributes.password().getOriginal() : "",
+    );
+    if (undefined !== attributes.destination()) {
+      attrs.destination(attributes.destination());
+    }
+    if (_.isEmpty(attrs.name())) {
+      attrs.name(attrs.url());
+    }
+    const errors = attributes.errors().errors();
+    if (errors !== undefined) {
+      attrs.errors(new Errors(errors));
+    } else {
+      attrs.errors(new Errors());
+    }
+    return attrs;
+  }
 }
 
 export class HgMaterialAttributes extends ScmMaterialAttributes {
@@ -352,6 +423,31 @@ export class HgMaterialAttributes extends ScmMaterialAttributes {
       attrs.destination(json.destination);
     }
     attrs.errors(new Errors(json.errors));
+    return attrs;
+  }
+
+  static fromHgMaterialAttribute(attributes: HgMaterialAttributes) {
+    const attrs = new HgMaterialAttributes(
+      attributes.materialName(),
+      attributes.autoUpdate(),
+      attributes.url(),
+      attributes.username(),
+      attributes.password().isPlain() ? attributes.password().getOriginal() : "",
+      attributes.password().isSecure() ? attributes.password().getOriginal() : "",
+      attributes.branch()
+    );
+    if (undefined !== attributes.destination()) {
+      attrs.destination(attributes.destination());
+    }
+    if (_.isEmpty(attrs.name())) {
+      attrs.name(attrs.url());
+    }
+    const errors = attributes.errors().errors();
+    if (errors !== undefined) {
+      attrs.errors(new Errors(errors));
+    } else {
+      attrs.errors(new Errors());
+    }
     return attrs;
   }
 }
@@ -397,6 +493,32 @@ export class P4MaterialAttributes extends ScmMaterialAttributes {
       attrs.destination(json.destination);
     }
     attrs.errors(new Errors(json.errors));
+    return attrs;
+  }
+
+  static fromP4MaterialAttribute(attributes: P4MaterialAttributes) {
+    const attrs = new P4MaterialAttributes(
+      attributes.materialName(),
+      attributes.autoUpdate(),
+      attributes.port(),
+      attributes.useTickets(),
+      attributes.view(),
+      attributes.username(),
+      attributes.password().isPlain() ? attributes.password().getOriginal() : "",
+      attributes.password().isSecure() ? attributes.password().getOriginal() : "",
+    );
+    if (undefined !== attributes.destination()) {
+      attrs.destination(attributes.destination());
+    }
+    if (_.isEmpty(attrs.name())) {
+      attrs.name(attrs.url());
+    }
+    const errors = attributes.errors().errors();
+    if (errors !== undefined) {
+      attrs.errors(new Errors(errors));
+    } else {
+      attrs.errors(new Errors());
+    }
     return attrs;
   }
 }
@@ -446,6 +568,32 @@ export class TfsMaterialAttributes extends ScmMaterialAttributes {
     attrs.errors(new Errors(json.errors));
     return attrs;
   }
+
+  static fromTfsMaterialAttribute(attributes: TfsMaterialAttributes) {
+    const attrs = new TfsMaterialAttributes(
+      attributes.materialName(),
+      attributes.autoUpdate(),
+      attributes.url(),
+      attributes.domain(),
+      attributes.projectPath(),
+      attributes.username(),
+      attributes.password().isPlain() ? attributes.password().getOriginal() : "",
+      attributes.password().isSecure() ? attributes.password().getOriginal() : "",
+    );
+    if (undefined !== attributes.destination()) {
+      attrs.destination(attributes.destination());
+    }
+    if (_.isEmpty(attrs.name())) {
+      attrs.name(attrs.url());
+    }
+    const errors = attributes.errors().errors();
+    if (errors !== undefined) {
+      attrs.errors(new Errors(errors));
+    } else {
+      attrs.errors(new Errors());
+    }
+    return attrs;
+  }
 }
 
 export class DependencyMaterialAttributes extends MaterialAttributes {
@@ -473,6 +621,22 @@ export class DependencyMaterialAttributes extends MaterialAttributes {
       json.stage,
     );
     attrs.errors(new Errors(json.errors));
+    return attrs;
+  }
+
+  static fromDependencyMaterialAttribute(attributes: DependencyMaterialAttributes) {
+    const attrs  = new DependencyMaterialAttributes(
+      attributes.materialName(),
+      attributes.autoUpdate(),
+      attributes.pipeline(),
+      attributes.stage(),
+    );
+    const errors = attributes.errors().errors();
+    if (errors !== undefined) {
+      attrs.errors(new Errors(errors));
+    } else {
+      attrs.errors(new Errors());
+    }
     return attrs;
   }
 }

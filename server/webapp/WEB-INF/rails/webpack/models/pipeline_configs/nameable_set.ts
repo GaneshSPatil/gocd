@@ -106,4 +106,8 @@ export class NameableSet<T extends Nameable> extends ValidatableMixin implements
   values(): IterableIterator<T> {
     return this[Symbol.iterator]();
   }
+
+  get(name: string){
+    return this._members.get(name);
+  }
 }
