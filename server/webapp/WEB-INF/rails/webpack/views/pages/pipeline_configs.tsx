@@ -41,7 +41,7 @@ export class PipelineConfigsPage extends Page<null, State> {
         m.redraw();
       },
       onUpdate(originalName: string, material: Material) {
-        let oldMaterial = vnode.state.pipelineConfig.materials().get(name);
+        let oldMaterial = vnode.state.pipelineConfig.materials().get(originalName);
         if (oldMaterial !== undefined && !_.isEmpty(oldMaterial)) {
           vnode.state.pipelineConfig.materials().delete(oldMaterial);
         }

@@ -26,6 +26,10 @@ export class Errors {
     this._errors = errors;
   }
 
+  static clone(errors: Errors){
+    return new Errors(_.clone(errors._errors));
+  }
+
   add(attrName: string, message: string) {
     if (!this._errors[attrName]) {
       this._errors[attrName] = [];

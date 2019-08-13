@@ -339,6 +339,7 @@ export class SvnMaterialAttributes extends ScmMaterialAttributes {
     super(name, autoUpdate, username, password, encryptedPassword);
     this.url            = Stream(url);
     this.checkExternals = Stream(checkExternals);
+
     if (_.isEmpty(name)) {
       this.name(url ? url : "");
     }
@@ -401,6 +402,7 @@ export class HgMaterialAttributes extends ScmMaterialAttributes {
     super(name, autoUpdate, username, password, encryptedPassword);
     this.url    = Stream(url);
     this.branch = Stream(branch);
+
     if (_.isEmpty(name)) {
       this.name(url ? url : "");
     }
@@ -469,6 +471,7 @@ export class P4MaterialAttributes extends ScmMaterialAttributes {
     this.port       = Stream(port);
     this.useTickets = Stream(useTickets);
     this.view       = Stream(view);
+
     if (_.isEmpty(name)) {
       this.name(port ? port : "");
     }
@@ -511,7 +514,7 @@ export class P4MaterialAttributes extends ScmMaterialAttributes {
       attrs.destination(attributes.destination());
     }
     if (_.isEmpty(attrs.name())) {
-      attrs.name(attrs.url());
+      attrs.name(attrs.port());
     }
     const errors = attributes.errors().errors();
     if (errors !== undefined) {
@@ -519,6 +522,7 @@ export class P4MaterialAttributes extends ScmMaterialAttributes {
     } else {
       attrs.errors(new Errors());
     }
+    attrs.errors(Errors.clone(attributes.errors()));
     return attrs;
   }
 }

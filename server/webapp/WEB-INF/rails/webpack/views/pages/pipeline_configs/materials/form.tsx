@@ -61,8 +61,7 @@ export class AddMaterialModal extends Modal {
           this.material.attributes().name(this.material.attributes().materialName());
         }
         this.onSuccessfulAdd(this.material);
-      }}>Add</Buttons.Primary>,
-      <Buttons.Secondary>Check connection</Buttons.Secondary>
+      }}>Add</Buttons.Primary>
     ];
   }
 }
