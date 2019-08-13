@@ -52,11 +52,18 @@ export class Stage extends ValidatableMixin {
   name: Stream<string>;
   approval: Stream<Approval> = Stream(new Approval());
   jobs: Stream<NameableSet<Job>>;
+  fetchMaterials: Stream<Boolean>;
+  artifactCleanupProhibited: Stream<Boolean>;
+  cleanWorkingDir: Stream<Boolean>;
 
   constructor(name: string, jobs: Job[]) {
     super();
 
     this.name = Stream(name);
+    this.fetchMaterials = stream();
+    this.artifactCleanupProhibited = stream();
+    this.cleanWorkingDir = stream();
+
     this.validatePresenceOf("name");
     this.validateIdFormat("name");
 

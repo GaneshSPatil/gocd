@@ -20,6 +20,7 @@ import {NameableSet} from "models/pipeline_configs/nameable_set";
 import {Stage} from "models/pipeline_configs/stage";
 import {Secondary} from "views/components/buttons";
 import * as styles from "views/pages/pipeline_configs/index.scss";
+import {AddStageModal} from "views/pages/pipeline_configs/stages/forms";
 import {ConceptDiagram} from "views/pages/pipelines/concept_diagram";
 import * as collapseStyles from "views/components/collapsible_panel/index.scss";
 import * as _ from "lodash";
@@ -55,7 +56,7 @@ export class StagesWidget extends MithrilViewComponent<Attrs> {
           <div class={styles.headerText}>Stages</div>
         </div>
         <div class={collapseStyles.actions}>
-          <Secondary>Add stage</Secondary>
+          <Secondary onclick={() => new AddStageModal().render()}>Add stage</Secondary>
         </div>
       </div>
       <div class={styles.panelContent}>
