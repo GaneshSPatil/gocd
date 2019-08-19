@@ -36,14 +36,18 @@ interface Attrs {
 }
 
 export class AddStageModal extends Modal {
+  private readonly stage: Stage;
+  private readonly job: Job;
 
   constructor() {
     super(Size.large);
+    this.stage = new Stage("", []);
+    this.job   = new Job("", []);
   }
 
   body(): m.Children {
-    const stageDetails = <StagesDetails stage={new Stage("", [])}/>;
-    const jobDetails   = <JobDetails job={new Job("", [])}/>;
+    const stageDetails = <StagesDetails stage={this.stage}/>;
+    const jobDetails   = <JobDetails job={this.job}/>;
 
 
     return <Tabs tabs={["Stage details", "Job details", "Tasks"]} contents={[stageDetails, jobDetails, ""]}/>;

@@ -24,6 +24,8 @@ export class Job extends ValidatableMixin {
   name: Stream<string>;
   environmentVariables: Stream<EnvironmentVariableConfig[]>;
   tasks: Stream<Task[]>;
+  elasticProfileId: Stream<string>;
+  resources: Stream<string>;
 
   constructor(name: string, tasks: Task[], envVars?: EnvironmentVariableConfig[]) {
     super();
@@ -31,6 +33,8 @@ export class Job extends ValidatableMixin {
     this.name = Stream(name);
     this.tasks = Stream(tasks);
     this.environmentVariables = Stream(envVars!);
+    this.elasticProfileId     = stream();
+    this.resources            = stream();
     this.validatePresenceOf("name");
     this.validateIdFormat("name");
 
@@ -38,7 +42,9 @@ export class Job extends ValidatableMixin {
     this.validateNonEmptyCollection("tasks", {message: "A job must have at least one task"});
     this.validateEach("tasks");
     this.validateEach("environmentVariables");
-    this.validateChildAttrIsUnique("environmentVariables", "name", {message: "Environment Variable names must be unique"});
+    this.validateChildAttrIsUnique("environmentVariables",
+                                   "name",
+                                   {message: "Environment Variable names must be unique"});
   }
 
   toApiPayload() {

@@ -248,7 +248,7 @@ function bindingAttributes<T>(attrs: BindingsAttr<T> & ReadonlyAttr,
   };
 
   if (!attrs.readonly) {
-    const existingHandler = (attrs as any)[eventName];
+    const existingHandler        = (attrs as any)[eventName];
     bindingAttributes[eventName] = (evt: any) => {
       if ("function" === typeof existingHandler) {
         existingHandler(evt);
@@ -393,9 +393,9 @@ export class TextAreaField extends FormField<string, TextAreaFieldAttrs> {
     return (
       <textarea
         class={classnames(styles.formControl,
-                              styles.textArea,
-                              SizeTransformer.transform(vnode.attrs.size),
-                              {[styles.textareaFixed]: !(vnode.attrs.resizable)})}
+                          styles.textArea,
+                          SizeTransformer.transform(vnode.attrs.size),
+                          {[styles.textareaFixed]: !(vnode.attrs.resizable)})}
         {...this.defaultAttributes(vnode.attrs)}
         rows={vnode.attrs.rows}
         oninput={(e) => {
@@ -496,7 +496,7 @@ export class CheckboxField extends FormField<boolean> {
   view(vnode: m.Vnode<BaseAttrs<boolean>>) {
     return (
       <li class={classnames(styles.formGroup,
-                                {[styles.formHasError]: ErrorText.hasErrorText(vnode.attrs as ErrorTextAttr)})}>
+                            {[styles.formHasError]: ErrorText.hasErrorText(vnode.attrs as ErrorTextAttr)})}>
         <div class={styles.formCheck}>
           {this.renderInputField(vnode)}
           <Label {...vnode.attrs as LabelAttr} fieldId={this.id}/>
@@ -520,7 +520,7 @@ export class TriStateCheckboxField extends FormField<TriStateCheckbox> {
   view(vnode: m.Vnode<BaseAttrs<TriStateCheckbox>>) {
     return (
       <li class={classnames(styles.formGroup,
-                                {[styles.formHasError]: ErrorText.hasErrorText(vnode.attrs as ErrorTextAttr)})}>
+                            {[styles.formHasError]: ErrorText.hasErrorText(vnode.attrs as ErrorTextAttr)})}>
         <div class={styles.formCheck}>
           {this.renderInputField(vnode)}
           <Label {...vnode.attrs as LabelAttr} fieldId={this.id}/>
@@ -731,5 +731,57 @@ export class SearchFieldWithButton extends QuickAddField {
              {...this.defaultAttributes(vnode.attrs)}
              {...bindingAttributes(vnode.attrs, "oninput", "value")}/>
     </span>;
+  }
+}
+
+export interface RadioButtonAttrs {
+  label: string;
+  errorText?: string;
+  disabled?: boolean;
+  required?: boolean;
+  property: (newValue?: string | boolean) => string | boolean;
+  possibleValues: Map<string, string | boolean>;
+}
+
+export class RadioField extends MithrilViewComponent<RadioButtonAttrs> {
+  protected readonly id: string = `input-${uuid()}`;
+
+  view(vnode: m.Vnode<RadioButtonAttrs>) {
+    const maybeRequired = this.isRequiredField(vnode) ?
+      <span className={styles.formLabelRequired}>*</span> : undefined;
+    return (
+      <li className={classnames(styles.formGroup, {[styles.formHasError]: this.hasErrorText(vnode)})}>
+        <label for={this.id} className={styles.formLabel}
+               data-test-id="form-field-label">{vnode.attrs.label}{maybeRequired}:</label>
+        {this.renderInputField(vnode)}
+      </li>
+    );
+  }
+
+  protected isRequiredField(vnode: m.Vnode<RadioButtonAttrs>) {
+    return vnode.attrs.required;
+  }
+
+  protected hasErrorText(vnode: m.Vnode<RadioButtonAttrs>) {
+    return !_.isEmpty(vnode.attrs.errorText);
+  }
+
+  private renderInputField(vnode: m.Vnode<RadioButtonAttrs>) {
+    const result: m.Children[] = [];
+
+    vnode.attrs.possibleValues.forEach((value, key) => {
+      const radioButtonId = `${this.id}-${s.slugify(key)}`;
+      result.push(
+        <div className={styles.formCheck}>
+          <input type="radio"
+                 id={radioButtonId}
+                 name={this.id} onchange={() => vnode.attrs.property(value)}/>
+          <label for={radioButtonId} className={styles.formLabel}
+                 data-test-id="form-field-label">{key}</label>
+        </div>
+      );
+    });
+
+    return result;
   }
 }

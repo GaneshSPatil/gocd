@@ -29,7 +29,7 @@ import {EncryptedValue} from "views/components/forms/encrypted_value";
 import {Form} from "views/components/forms/form";
 import {
   CheckboxField, CopyField,
-  PasswordField, QuickAddField,
+  PasswordField, QuickAddField, RadioField,
   SearchField, SearchFieldWithButton,
   Switch,
   TextField,
@@ -77,9 +77,10 @@ export class KitchenSink extends MithrilViewComponent<null> {
   provider: DynamicSuggestionProvider = new DynamicSuggestionProvider(type);
 
   view(vnode: m.Vnode<null>) {
-    const model: Stream<string>     = Stream();
-    const textValue: Stream<string> = Stream();
-    const name: Stream<string>      = Stream();
+    const model: Stream<string>      = Stream();
+    const textValue: Stream<string>  = Stream();
+    const name: Stream<string>       = Stream();
+    const radioValue: Stream<string> = stream();
 
     return (
       <div>
@@ -304,6 +305,15 @@ export class KitchenSink extends MithrilViewComponent<null> {
         <Table draggable={true} headers={["Pipeline", "Stage", "Job"]} data={pipelineData()}
                dragHandler={updateModel.bind(this)}/>
         <p>Model: {JSON.stringify(pipelines())}</p>
+        <br/>
+        <RadioField label="Choose your favorite pizza topping"
+                    property={radioValue}
+                    possibleValues={new Map([
+                                              ["Thin Crust", "thin-crust"],
+                                              ["Cheese burst", "cheese-burst"],
+                                              ["Boring regular", "regular"],
+                                            ])}>
+        </RadioField>
       </div>
     );
   }
