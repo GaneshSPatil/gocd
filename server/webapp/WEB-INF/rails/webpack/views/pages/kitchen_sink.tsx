@@ -80,7 +80,7 @@ export class KitchenSink extends MithrilViewComponent<null> {
     const model: Stream<string>      = Stream();
     const textValue: Stream<string>  = Stream();
     const name: Stream<string>       = Stream();
-    const radioValue: Stream<string> = stream();
+    const radioValue: Stream<string> = Stream();
 
     return (
       <div>

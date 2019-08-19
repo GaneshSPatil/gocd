@@ -15,7 +15,7 @@
  */
 
 import {MithrilViewComponent} from "jsx/mithril-component";
-import * as m from "mithril";
+import m from "mithril";
 import {NameableSet} from "models/pipeline_configs/nameable_set";
 import {Stage} from "models/pipeline_configs/stage";
 import {Secondary} from "views/components/buttons";

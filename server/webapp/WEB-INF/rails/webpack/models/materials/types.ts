@@ -77,10 +77,10 @@ export class Materials {
 export class Material extends ValidatableMixin {
   private static API_VERSION_HEADER = ApiVersion.v1;
 
-  type: Stream<string | undefined>;
+  type: Stream<string>;
   attributes: Stream<MaterialAttributes | undefined>;
 
-  constructor(type?: string, attributes?: MaterialAttributes) {
+  constructor(type: string, attributes?: MaterialAttributes) {
     super();
     this.attributes = Stream(attributes);
     this.type       = Stream(type);
@@ -173,7 +173,7 @@ export abstract class MaterialAttributes extends ValidatableMixin {
     }
   }
 
-  static clone(type: string, material: MaterialAttributes) {
+  static clone(type: string, material: MaterialAttributes | undefined) {
     switch (type) {
       case "git":
         return GitMaterialAttributes.fromGitMaterialAttribute(material as GitMaterialAttributes);
@@ -260,7 +260,7 @@ class AuthNotSetInUrlAndUserPassFieldsValidator extends Validator {
 export class GitMaterialAttributes extends ScmMaterialAttributes {
   url: Stream<string | undefined>;
   branch: Stream<string | undefined>;
-  shallowClone: Stream<boolean>;
+  shallowClone: Stream<boolean | undefined>;
 
   constructor(name?: string, autoUpdate?: boolean, url?: string, branch?: string,
               username?: string,
@@ -315,12 +315,7 @@ export class GitMaterialAttributes extends ScmMaterialAttributes {
       attrs.name(attrs.url());
     }
 
-    const errors = attributes.errors().errors();
-    if (errors !== undefined) {
-      attrs.errors(new Errors(errors));
-    } else {
-      attrs.errors(new Errors());
-    }
+    attrs.errors(Errors.clone(attributes.errors()));
     return attrs;
   }
 }
@@ -380,12 +375,7 @@ export class SvnMaterialAttributes extends ScmMaterialAttributes {
     if (_.isEmpty(attrs.name())) {
       attrs.name(attrs.url());
     }
-    const errors = attributes.errors().errors();
-    if (errors !== undefined) {
-      attrs.errors(new Errors(errors));
-    } else {
-      attrs.errors(new Errors());
-    }
+    attrs.errors(Errors.clone(attributes.errors()));
     return attrs;
   }
 }
@@ -444,12 +434,7 @@ export class HgMaterialAttributes extends ScmMaterialAttributes {
     if (_.isEmpty(attrs.name())) {
       attrs.name(attrs.url());
     }
-    const errors = attributes.errors().errors();
-    if (errors !== undefined) {
-      attrs.errors(new Errors(errors));
-    } else {
-      attrs.errors(new Errors());
-    }
+    attrs.errors(Errors.clone(attributes.errors()));
     return attrs;
   }
 }
@@ -516,12 +501,7 @@ export class P4MaterialAttributes extends ScmMaterialAttributes {
     if (_.isEmpty(attrs.name())) {
       attrs.name(attrs.port());
     }
-    const errors = attributes.errors().errors();
-    if (errors !== undefined) {
-      attrs.errors(new Errors(errors));
-    } else {
-      attrs.errors(new Errors());
-    }
+    attrs.errors(Errors.clone(attributes.errors()));
     attrs.errors(Errors.clone(attributes.errors()));
     return attrs;
   }
@@ -590,12 +570,7 @@ export class TfsMaterialAttributes extends ScmMaterialAttributes {
     if (_.isEmpty(attrs.name())) {
       attrs.name(attrs.url());
     }
-    const errors = attributes.errors().errors();
-    if (errors !== undefined) {
-      attrs.errors(new Errors(errors));
-    } else {
-      attrs.errors(new Errors());
-    }
+    attrs.errors(Errors.clone(attributes.errors()));
     return attrs;
   }
 }
@@ -635,12 +610,7 @@ export class DependencyMaterialAttributes extends MaterialAttributes {
       attributes.pipeline(),
       attributes.stage(),
     );
-    const errors = attributes.errors().errors();
-    if (errors !== undefined) {
-      attrs.errors(new Errors(errors));
-    } else {
-      attrs.errors(new Errors());
-    }
+    attrs.errors(Errors.clone(attributes.errors()));
     return attrs;
   }
 }

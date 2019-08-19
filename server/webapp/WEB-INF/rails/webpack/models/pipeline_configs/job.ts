@@ -30,11 +30,11 @@ export class Job extends ValidatableMixin {
   constructor(name: string, tasks: Task[], envVars?: EnvironmentVariableConfig[]) {
     super();
 
-    this.name = Stream(name);
-    this.tasks = Stream(tasks);
+    this.name                 = Stream(name);
+    this.tasks                = Stream(tasks);
     this.environmentVariables = Stream(envVars!);
-    this.elasticProfileId     = stream();
-    this.resources            = stream();
+    this.elasticProfileId     = Stream();
+    this.resources            = Stream();
     this.validatePresenceOf("name");
     this.validateIdFormat("name");
 

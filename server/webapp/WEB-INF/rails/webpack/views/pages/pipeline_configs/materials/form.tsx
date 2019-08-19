@@ -17,7 +17,7 @@
 import {Material} from "models/materials/types";
 import * as Buttons from "views/components/buttons";
 import {Modal, Size} from "views/components/modal";
-import * as m from "mithril";
+import m from "mithril";
 import * as _ from "lodash";
 import {MaterialEditor} from "views/pages/pipeline_configs/materials/material_editor";
 
@@ -45,20 +45,26 @@ export class AddMaterialModal extends Modal {
   }
 
   title(): string {
-    if (_.isEmpty(this.material.attributes()) || _.isEmpty(this.material.attributes().name())) {
+    let materialAttributes = this.material.attributes();
+    if (_.isUndefined(materialAttributes) || _.isEmpty(materialAttributes.name())) {
       return "Add material";
     }
-    return this.material.attributes().name();
+
+    let materialName = materialAttributes.name();
+    return _.isUndefined(materialName) ? "" : materialName;
   }
 
   buttons(): m.ChildArray {
     return [
       <Buttons.Primary data-test-id="button-ok" onclick={() => {
         this.close();
-        if (_.isEmpty(this.material.attributes().materialName())) {
-          this.material.attributes().name(this.material.materialUrl());
-        } else {
-          this.material.attributes().name(this.material.attributes().materialName());
+        let materialAttributes = this.material.attributes();
+        if (!_.isUndefined(materialAttributes)) {
+          if (_.isEmpty(materialAttributes.materialName())) {
+            materialAttributes.name(this.material.materialUrl());
+          } else {
+            materialAttributes.name(materialAttributes.materialName());
+          }
         }
         this.onSuccessfulAdd(this.material);
       }}>Add</Buttons.Primary>
@@ -89,11 +95,14 @@ export class UpdateMaterialModal extends Modal {
     let originalMaterialName = this.material.name();
     return [
       <Buttons.Primary data-test-id="button-ok" onclick={() => {
+        let materialAttributes = this.material.attributes();
         this.close();
-        if (_.isEmpty(this.material.attributes().materialName())) {
-          this.material.attributes().name(this.material.materialUrl());
-        } else {
-          this.material.attributes().name(this.material.attributes().materialName());
+        if (!_.isUndefined(materialAttributes)) {
+          if (_.isEmpty(materialAttributes.materialName())) {
+            materialAttributes.name(this.material.materialUrl());
+          } else {
+            materialAttributes.name(materialAttributes.materialName());
+          }
         }
         this.onSuccessfulUpdate(originalMaterialName, this.material);
       }}>Update</Buttons.Primary>

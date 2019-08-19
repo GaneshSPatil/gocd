@@ -59,10 +59,10 @@ export class Stage extends ValidatableMixin {
   constructor(name: string, jobs: Job[]) {
     super();
 
-    this.name = Stream(name);
-    this.fetchMaterials = stream();
-    this.artifactCleanupProhibited = stream();
-    this.cleanWorkingDir = stream();
+    this.name                      = Stream(name);
+    this.fetchMaterials            = Stream();
+    this.artifactCleanupProhibited = Stream();
+    this.cleanWorkingDir           = Stream();
 
     this.validatePresenceOf("name");
     this.validateIdFormat("name");

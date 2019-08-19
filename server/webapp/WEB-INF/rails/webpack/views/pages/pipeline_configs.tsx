@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as m from "mithril";
+import m from "mithril";
 import {Material} from "models/materials/types";
 import {PipelineConfig} from "models/pipeline_configs/pipeline_config";
 import {PipelineSettingsModal} from "views/pages/pipeline_configs/pipeline_settings_modal";

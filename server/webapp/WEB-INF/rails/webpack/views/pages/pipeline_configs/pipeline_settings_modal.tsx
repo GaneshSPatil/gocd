@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as m from "mithril";
+import m from "mithril";
 import * as Buttons from "views/components/buttons";
 import {Modal, Size} from "views/components/modal";
 

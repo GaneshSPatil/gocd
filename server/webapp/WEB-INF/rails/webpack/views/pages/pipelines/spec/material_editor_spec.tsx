@@ -24,7 +24,7 @@ describe("AddPipeline: Material Editor", () => {
   let material: Material;
 
   beforeEach(() => {
-    material = new Material();
+    material = new Material("");
 
     helper.mount(() => {
       return <MaterialEditor material={material}/>;

@@ -20,7 +20,7 @@ import {Stage} from "models/pipeline_configs/stage";
 import {IdentifierInputField} from "views/components/forms/common_validating_inputs";
 import {Form, FormBody} from "views/components/forms/form";
 import {Modal, Size} from "views/components/modal";
-import * as m from "mithril";
+import m from "mithril";
 import {SwitchBtn} from "views/components/switch";
 import {Tabs} from "views/components/tab";
 import * as Buttons from "views/components/buttons";

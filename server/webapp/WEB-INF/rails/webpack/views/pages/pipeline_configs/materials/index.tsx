@@ -15,7 +15,7 @@
  */
 
 import {MithrilViewComponent} from "jsx/mithril-component";
-import * as m from "mithril";
+import m from "mithril";
 import {GitMaterialAttributes, Material, MaterialAttributes} from "models/materials/types";
 import {NameableSet} from "models/pipeline_configs/nameable_set";
 import {Secondary} from "views/components/buttons";
@@ -90,7 +90,7 @@ export class MaterialsWidget extends MithrilViewComponent<Attrs> {
     return <tbody>{tbodyContent}</tbody>;
   }
 
-  getTypeForDisplay(type: string) {
+  getTypeForDisplay(type: string | undefined) {
     switch (type) {
       case "git":
         return "Git";

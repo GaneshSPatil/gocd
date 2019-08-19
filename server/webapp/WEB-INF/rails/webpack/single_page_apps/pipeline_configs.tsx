@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import Page from "helpers/spa_base";
+import {Page} from "helpers/spa_base";
 import {PipelineConfigsPage} from "views/pages/pipeline_configs";
 
 export class PipelineConfigsSPA extends Page {

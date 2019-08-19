@@ -15,25 +15,24 @@
  */
 
 import {MithrilViewComponent} from "jsx/mithril-component";
-import * as m from "mithril";
+import m from "mithril";
 import {Job} from "models/pipeline_configs/job";
 import {IdentifierInputField} from "views/components/forms/common_validating_inputs";
 import {Form, FormBody} from "views/components/forms/form";
 import {RadioField, TextField} from "views/components/forms/input_fields";
 import {IDENTIFIER_FORMAT_HELP_MESSAGE} from "../messages";
 import * as _ from "lodash";
-import {Stream} from "mithril/stream";
-import * as stream from "mithril/stream";
+import Stream from "mithril/stream";
 
 interface Attrs {
   job: Job;
 }
 
 export class JobDetails extends MithrilViewComponent<Attrs> {
-  private runOnElasticAgent: Stream<boolean> = stream();
+  private runOnElasticAgent: Stream<boolean> = Stream();
 
   oninit(vnode: m.Vnode<Attrs, this>): any {
-    this.runOnElasticAgent = stream(!_.isEmpty(vnode.attrs.job.elasticProfileId()));
+    this.runOnElasticAgent = Stream(!_.isEmpty(vnode.attrs.job.elasticProfileId()));
   }
 
   view(vnode: m.Vnode<Attrs>) {
