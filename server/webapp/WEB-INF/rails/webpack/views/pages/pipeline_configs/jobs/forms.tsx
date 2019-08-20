@@ -17,9 +17,11 @@
 import {MithrilViewComponent} from "jsx/mithril-component";
 import m from "mithril";
 import {Job} from "models/pipeline_configs/job";
+import {AutocompleteField} from "views/components/forms/autocomplete";
 import {IdentifierInputField} from "views/components/forms/common_validating_inputs";
 import {Form, FormBody} from "views/components/forms/form";
 import {RadioField, TextField} from "views/components/forms/input_fields";
+import {ElasticProfileDynamicSuggestionsProvider} from "views/pages/pipeline_configs/jobs/elastic_profile_dynamic_suggestions_provider";
 import {IDENTIFIER_FORMAT_HELP_MESSAGE} from "../messages";
 import * as _ from "lodash";
 import Stream from "mithril/stream";
@@ -38,7 +40,8 @@ export class JobDetails extends MithrilViewComponent<Attrs> {
   view(vnode: m.Vnode<Attrs>) {
     let html;
     if (this.runOnElasticAgent()) {
-      html = <TextField property={vnode.attrs.job.elasticProfileId} label="Elastic profile"/>;
+      html = <AutocompleteField label="Dynamic" property={vnode.attrs.job.elasticProfileId} provider={new ElasticProfileDynamicSuggestionsProvider()}/>
+        // <TextField property={vnode.attrs.job.elasticProfileId} label="Elastic profile"/>;
     } else {
       html = <TextField property={vnode.attrs.job.resources} label="Resources"/>;
     }
