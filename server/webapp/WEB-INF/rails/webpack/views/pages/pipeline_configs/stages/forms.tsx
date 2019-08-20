@@ -26,6 +26,7 @@ import {Tabs} from "views/components/tab";
 import * as Buttons from "views/components/buttons";
 import {TooltipSize} from "views/components/tooltip";
 import {JobDetails} from "views/pages/pipeline_configs/jobs/forms";
+import {Tasks} from "views/pages/pipeline_configs/stages/on_create/tasks_widget";
 import {AdvancedSettings} from "views/pages/pipelines/advanced_settings";
 import {IDENTIFIER_FORMAT_HELP_MESSAGE} from "views/pages/pipelines/messages";
 import * as Tooltip from "views/components/tooltip";
@@ -48,9 +49,10 @@ export class AddStageModal extends Modal {
   body(): m.Children {
     const stageDetails = <StagesDetails stage={this.stage}/>;
     const jobDetails   = <JobDetails job={this.job}/>;
+    const tasks   = <Tasks />;
 
 
-    return <Tabs tabs={["Stage details", "Job details", "Tasks"]} contents={[stageDetails, jobDetails, ""]}/>;
+    return <Tabs tabs={["Stage details", "Job details", "Tasks"]} contents={[tasks, stageDetails, jobDetails]}/>;
   }
 
   title(): string {

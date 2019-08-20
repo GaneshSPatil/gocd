@@ -38,6 +38,10 @@
           <job name="up42_job">
             <tasks>
               <exec command="ls" />
+              <exec command="ls">
+                <arg>asdf</arg>
+                <runif status="passed" />
+              </exec>
             </tasks>
           </job>
         </jobs>
