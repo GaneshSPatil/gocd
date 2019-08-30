@@ -26,6 +26,7 @@ import {CollapsiblePanel} from "views/components/collapsible_panel";
 import * as Icons from "views/components/icons/index";
 import {StageSettingsModal} from "views/pages/pipeline_configs/stages/settings/stage_settings_modal";
 import styles from "./stages.scss";
+import $ from "jquery";
 
 interface StageBoxState {
   onStageSettingsClick: (e: MouseEvent) => void;
@@ -33,7 +34,7 @@ interface StageBoxState {
 
 interface StageBoxAttrs {
   stage: StageConfig;
-  isLastVisibleStage: Stream<boolean>;
+  isFirstStage: boolean;
 }
 
 export class StageBoxWidget extends MithrilComponent<StageBoxAttrs, StageBoxState> {
@@ -45,11 +46,17 @@ export class StageBoxWidget extends MithrilComponent<StageBoxAttrs, StageBoxStat
   }
 
   view(vnode: m.Vnode<StageBoxAttrs, StageBoxState>) {
-    const triggerNextStageIcon = vnode.attrs.isLastVisibleStage()
-      ? undefined
-      : <div className={styles.forwardIconWrapper}><Icons.Forward iconOnly={true}/></div>;
+    let triggerThisStageIcon = undefined;
+    if (!vnode.attrs.isFirstStage) {
+      triggerThisStageIcon =
+        <div data-test-id={`trigger-icon-for-stage-${vnode.attrs.stage.name()}`}
+             class={`${styles.forwardIconWrapper} trigger-icon`}>
+          <Icons.Forward iconOnly={true}/></div>;
+    }
+
 
     return <div class={`${styles.stageWithManualApprovalContainer} stage-box`}>
+      {triggerThisStageIcon}
       <div data-test-id="stage-box" className={styles.stageBox}>
         <div className={styles.stageNameHeader} data-test-id={`stage-header-for-${vnode.attrs.stage.name()}`}>
           <i className={`icon_drag_stage ${styles.iconDrag}`}/>
@@ -65,7 +72,6 @@ export class StageBoxWidget extends MithrilComponent<StageBoxAttrs, StageBoxStat
           <Secondary small={true}>Add Job</Secondary>
         </div>
       </div>
-      {triggerNextStageIcon}
     </div>;
   }
 }
@@ -129,7 +135,14 @@ export class StagesWidget extends MithrilComponent<Attrs, State> {
       vnode.attrs.stages(stages);
     });
 
-    sortable.on("sortable:stop", m.redraw);
+    sortable.on("sortable:start", (event: any) => {
+      $(".trigger-icon").hide();
+    });
+
+    sortable.on("sortable:stop", () => {
+      $(".trigger-icon").show();
+      m.redraw();
+    });
   }
 
   view(vnode: m.Vnode<Attrs, State>) {
@@ -146,7 +159,7 @@ export class StagesWidget extends MithrilComponent<Attrs, State> {
               stagesToRender.map((stage: StageConfig, index) => {
                 return <StageBoxWidget stage={stage}
                                        key={stage.name() + index}
-                                       isLastVisibleStage={Stream(stagesToRender.length - 1 === index)}/>;
+                                       isFirstStage={index === 0}/>;
               })
             }
           </div>
