@@ -246,6 +246,10 @@ export class SparkRoutes {
     return `/go/api/admin/maintenance_mode/enable`;
   }
 
+  static agentJobRunHistoryAPIPath(uuid: string): string {
+    return `/go/api/agents/${uuid}/job_run_history`;
+  }
+
   static disableMaintenanceModePath(): string {
     return `/go/api/admin/maintenance_mode/disable`;
   }
