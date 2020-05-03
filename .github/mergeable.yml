@@ -3,9 +3,6 @@ mergeable:
   - when: pull_request.*
     validate:
       - do: project
-        no_empty:
-          enabled: true
-          message: "Project must be specified"
         must_include:
           # one or more chars
           regex: '.+'
