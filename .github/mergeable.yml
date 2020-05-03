@@ -2,31 +2,7 @@ version: 2
 mergeable:
   - when: pull_request.*
     validate:
-      - do: milestone
+      - do: description
         no_empty:
           enabled: true
-          message: "Milestone must be specified"
-        must_include:
-          # one or more chars
-          regex: '.+'
-          message: "Milestone must be specified"
-      - do: project
-        no_empty:
-          enabled: true
-          message: "Project must be specified"
-        must_include:
-          # one or more chars
-          regex: '.+'
-          message: "Project must be specified"
-    pass:
-      - do: checks
-        status: success
-        payload:
-          title: "Result: success"
-          summary: "Okay to merge"
-    fail:
-      - do: checks
-        status: failure
-        payload:
-          title: The PR is not ready to be merged.
-          summary: The pull request is not ready to be merged.
+          message: 'Please describe the changes'
