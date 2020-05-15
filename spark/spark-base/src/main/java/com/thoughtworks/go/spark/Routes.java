@@ -907,4 +907,5 @@ public class Routes {
     public class InternalDependencyPipelines {
         public static final String BASE = "/api/internal/pipelines/:pipeline_name/:stage_name/upstream";
     }
+	public class InternalPipelineGroups {public static final String BASE = "/admin/api/internal-pipeline-groups";}
 }
