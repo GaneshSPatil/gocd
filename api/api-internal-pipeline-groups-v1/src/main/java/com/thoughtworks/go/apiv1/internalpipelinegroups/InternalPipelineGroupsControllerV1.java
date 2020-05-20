@@ -16,14 +16,18 @@
 
 package com.thoughtworks.go.apiv1.internalpipelinegroups;
 
+import com.google.common.collect.ImmutableMap;
 import com.thoughtworks.go.api.ApiController;
 import com.thoughtworks.go.api.ApiVersion;
-import com.thoughtworks.go.api.CrudController;
-import com.thoughtworks.go.api.base.OutputWriter;
 import com.thoughtworks.go.api.spring.ApiAuthenticationHelper;
-import com.thoughtworks.go.config.exceptions.EntityType;
-import com.thoughtworks.go.config.exceptions.HttpException;
-import com.thoughtworks.go.server.service.EntityHashingService;
+import com.thoughtworks.go.api.util.HaltApiResponses;
+import com.thoughtworks.go.apiv1.internalpipelinegroups.models.PipelineGroupsViewModel;
+import com.thoughtworks.go.apiv1.internalpipelinegroups.representers.InternalPipelineGroupsRepresenter;
+import com.thoughtworks.go.config.EnvironmentsConfig;
+import com.thoughtworks.go.domain.PipelineGroups;
+import com.thoughtworks.go.server.service.EnvironmentConfigService;
+import com.thoughtworks.go.server.service.PipelineConfigService;
+import com.thoughtworks.go.spark.Routes;
 import com.thoughtworks.go.spark.spring.SparkSpringController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,21 +35,33 @@ import spark.Request;
 import spark.Response;
 
 import java.io.IOException;
-import java.util.function.Consumer;
+import java.util.Map;
+import java.util.function.Supplier;
 
 import static spark.Spark.*;
 
+/**
+ * Internal PipelineGroups API, to be used on the environments SPA while editing pipelines.
+ */
 @Component
-public class InternalPipelineGroupsControllerV1 extends ApiController implements SparkSpringController, CrudController<InternalPipelineGroups> {
+public class InternalPipelineGroupsControllerV1 extends ApiController implements SparkSpringController {
 
     private final ApiAuthenticationHelper apiAuthenticationHelper;
-    private final EntityHashingService entityHashingService;
+    private final Map<String, Supplier<PipelineGroups>> pipelineGroupAuthorizationRegistry;
+    private final EnvironmentConfigService environmentConfigService;
 
     @Autowired
-    public InternalPipelineGroupsControllerV1(ApiAuthenticationHelper apiAuthenticationHelper, EntityHashingService entityHashingService) {
+    public InternalPipelineGroupsControllerV1(ApiAuthenticationHelper apiAuthenticationHelper,
+                                              PipelineConfigService pipelineConfigService,
+                                              EnvironmentConfigService environmentConfigService) {
         super(ApiVersion.v1);
         this.apiAuthenticationHelper = apiAuthenticationHelper;
-        this.entityHashingService = entityHashingService;
+        this.pipelineGroupAuthorizationRegistry = ImmutableMap.<String, Supplier<PipelineGroups>>builder()
+                .put("view", () -> pipelineConfigService.viewableGroupsForUserIncludingConfigRepos(currentUsername()))
+                .put("operate", () -> pipelineConfigService.viewableOrOperatableGroupsForIncludingConfigRepos(currentUsername()))
+                .put("administer", () -> pipelineConfigService.adminGroupsForIncludingConfigRepos(currentUsername()))
+                .build();
+        this.environmentConfigService = environmentConfigService;
     }
 
     @Override
@@ -56,49 +72,29 @@ public class InternalPipelineGroupsControllerV1 extends ApiController implements
     @Override
     public void setupRoutes() {
         path(controllerBasePath(), () -> {
-            // uncomment the line below to set the content type on the base path
-            // before("", mimeType, this::setContentType);
-            // uncomment the line below to set the content type on nested routes
-            // before("/*", mimeType, this::setContentType);
+            before("", mimeType, this::setContentType);
+            before("/*", mimeType, this::setContentType);
 
-            // uncomment for the `index` action
-            // get("", mimeType, this::index);
+            before("", this.mimeType, this.apiAuthenticationHelper::checkUserAnd403);
+            before("/*", this.mimeType, this.apiAuthenticationHelper::checkUserAnd403);
 
-            // change the line below to enable appropriate security
-            before("", mimeType, this.apiAuthenticationHelper::checkAdminUserAnd403);
-            // to be implemented
+            get("", mimeType, this::index);
         });
     }
 
-    // public String index(Request request, Response response) throws IOException {
-    //    InternalPipelineGroups internalPipelineGroups = fetchEntityFromConfig(request.params(":id"));
-    //    return writerForTopLevelObject(request, response, outputWriter -> InternalPipelineGroupssRepresenter.toJSON(outputWriter, internalPipelineGroups));
-    // }
+    public String index(Request request, Response response) throws IOException {
+        String pipelineGroupAuthorizationType = request.queryParamOrDefault("pipeline_group_authorization", "view");
+        Supplier<PipelineGroups> pipelineGroupsSupplier = pipelineGroupAuthorizationRegistry.get(pipelineGroupAuthorizationType);
 
+        if (pipelineGroupsSupplier == null) {
+            HaltApiResponses.haltBecauseOfReason("Bad query parameter.");
+        }
 
-    @Override
-    public String etagFor(InternalPipelineGroups entityFromServer) {
-        return entityHashingService.md5ForEntity(entityFromServer);
-    }
+        EnvironmentsConfig environments = new EnvironmentsConfig();
+        environments.addAll(environmentConfigService.getEnvironments());
 
-    @Override
-    public EntityType getEntityType() {
-        return EntityType.InternalPipelineGroups;
-    }
+        PipelineGroupsViewModel pipelineGroupsViewModel = new PipelineGroupsViewModel(pipelineGroupsSupplier.get(), environments);
 
-    @Override
-    public InternalPipelineGroups doFetchEntityFromConfig(String name) {
-        return someService.getEntity(name);
-    }
-
-    @Override
-    public InternalPipelineGroups buildEntityFromRequestBody(Request req) {
-      JsonReader jsonReader = GsonTransformer.getInstance().jsonReaderFrom(req.body());
-      return InternalPipelineGroupsRepresenter.fromJSON(jsonReader);
-    }
-
-    @Override
-    public Consumer<OutputWriter> jsonWriter(InternalPipelineGroups internalPipelineGroups) {
-        return outputWriter -> InternalPipelineGroupsRepresenter.toJSON(outputWriter, internalPipelineGroups);
+        return writerForTopLevelObject(request, response, outputWriter -> InternalPipelineGroupsRepresenter.toJSON(outputWriter, pipelineGroupsViewModel));
     }
 }
