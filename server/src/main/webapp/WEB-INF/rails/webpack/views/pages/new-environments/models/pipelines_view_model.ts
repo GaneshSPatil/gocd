@@ -109,7 +109,7 @@ export class PipelinesViewModel {
   }
 
   fetchAllPipelines(callback: () => void) {
-    EnvironmentsAPIs.allPipelines("view", "view")
+    EnvironmentsAPIs.allPipelineGroups("view")
                     .then((result) =>
                             result.do((successResponse) => {
                               this.pipelineGroups(successResponse.body.groups());
