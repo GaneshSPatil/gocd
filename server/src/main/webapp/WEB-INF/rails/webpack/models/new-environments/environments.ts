@@ -66,7 +66,6 @@ export class EnvironmentWithOrigin extends ValidatableMixin {
   readonly agents: Stream<Agents>;
   readonly pipelines: Stream<Pipelines>;
   readonly environmentVariables: Stream<EnvironmentVariablesWithOrigin>;
-  pipelineNames: Stream<string[]>;
 
   constructor(name: string,
               canAdminister: boolean,
@@ -82,7 +81,6 @@ export class EnvironmentWithOrigin extends ValidatableMixin {
     this.agents               = Stream(agents);
     this.pipelines            = Stream(pipelines);
     this.environmentVariables = Stream(environmentVariables);
-    this.pipelineNames        = Stream(pipelines.map((p) => p.name()));
     this.validatePresenceOf("name");
     this.validateEach("environmentVariables");
     this.validateWith(new EnvironmentVariableNameUniquenessValidator(), "environmentVariables");
@@ -104,7 +102,7 @@ export class EnvironmentWithOrigin extends ValidatableMixin {
   }
 
   containsPipeline(name: string): boolean {
-    return this.pipelineNames().includes(name);
+    return this.pipelines().map((p) => p.name()).indexOf(name) !== -1;
   }
 
   containsAgent(uuid: string): boolean {
@@ -114,7 +112,6 @@ export class EnvironmentWithOrigin extends ValidatableMixin {
   addPipelineIfNotPresent(pipeline: PipelineWithOrigin) {
     if (!this.containsPipeline(pipeline.name())) {
       this.pipelines().push(pipeline);
-      this.pipelineNames().push(pipeline.name())
     }
   }
 
@@ -130,7 +127,6 @@ export class EnvironmentWithOrigin extends ValidatableMixin {
 
   removePipelineIfPresent(pipeline: PipelineWithOrigin) {
     _.remove(this.pipelines(), (p) => p.name() === pipeline.name());
-    _.remove(this.pipelineNames(), (name) => name === pipeline.name());
   }
 
   removeAgentIfPresent(agent: AgentWithOrigin) {

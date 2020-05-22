@@ -135,12 +135,8 @@ export class PipelineWithOrigin extends Pipeline {
 }
 
 export class Pipelines extends Array<PipelineWithOrigin> {
-  pipelineNames: Stream<string[]>;
-
   constructor(...items: PipelineWithOrigin[]) {
     super(...items);
-
-    this.pipelineNames  = Stream(this.map((p) => p.name()));
     Object.setPrototypeOf(this, Object.create(Pipelines.prototype));
   }
 
@@ -149,7 +145,7 @@ export class Pipelines extends Array<PipelineWithOrigin> {
   }
 
   containsPipeline(name: string): boolean {
-    return this.pipelineNames().includes(name);
+    return this.map((p) => p.name()).indexOf(name) !== -1;
   }
 
   clone() {
