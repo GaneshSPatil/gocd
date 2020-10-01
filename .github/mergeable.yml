@@ -11,7 +11,7 @@ mergeable:
           message: "Milestone must be specified"
       - do: project
         must_include:
-          regex: '20.8.0|.+'
+          regex: .*
           message: 'Project must be specified'
 
     pass:
