@@ -1,19 +1,18 @@
 version: 2
 mergeable:
-  - when: pull_request.*
+  - when: pull_request.*, pull_request_review.*
     validate:
       - do: milestone
         no_empty:
           enabled: true
           message: "Milestone must be specified"
         must_include:
-          # one or more chars
-          regex: '.+'
+          regex: '.*'
           message: "Milestone must be specified"
       - do: project
-        no_empty:
-          enabled: true
-          message: "Project must be specified"
+        must_include:
+          regex: 'type|chore|wont'
+          message: 'Project must be specified'
 
     pass:
       - do: checks
