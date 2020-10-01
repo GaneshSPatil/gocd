@@ -1,19 +1,28 @@
 version: 2
 mergeable:
-  - when: pull_request.*, pull_request_review.*
+  - when: pull_request.*
     validate:
       - do: milestone
         no_empty:
           enabled: true
           message: "Milestone must be specified"
         must_include:
-          regex: '.*'
+          # one or more chars
+          regex: '.+'
           message: "Milestone must be specified"
       - do: project
         must_include:
           regex: '([0-9]+)\.([0-9]+)\.([0-9]+)'
-          message: "Project must be specified"
-
+          message: "Project must be specified in the semvar versioning format. Example: 20.8.0"
     pass:
       - do: checks
-        status: 'success'
+        status: success
+        payload:
+          title: "Result: success"
+          summary: "Okay to merge"
+    fail:
+      - do: checks
+        status: failure
+        payload:
+          title: The PR is not ready to be merged.
+          summary: The pull request is not ready to be merged.
