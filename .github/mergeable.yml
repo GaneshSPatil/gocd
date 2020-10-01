@@ -1,6 +1,6 @@
 version: 2
 mergeable:
-  - when: pull_request.*
+  - when: pull_request.*, pull_request_review.*
     validate:
       - do: milestone
         no_empty:
@@ -9,15 +9,7 @@ mergeable:
         must_include:
           regex: '.+'
           message: "Milestone must be specified"
+
     pass:
       - do: checks
-        status: success
-        payload:
-          title: "Result: success"
-          summary: "Okay to merge"
-    fail:
-      - do: checks
-        status: failure
-        payload:
-          title: The PR is not ready to be merged.
-          summary: The pull request is not ready to be merged.
+        status: 'success'
