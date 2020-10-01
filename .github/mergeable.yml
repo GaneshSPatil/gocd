@@ -4,7 +4,7 @@ mergeable:
     validate:
       - do: project
         must_include:
-          regex: 'foo|bar|20.8.0'
+          regex: 'foo|bar|20.8.0|GoCD Project Board Spike,20.8.0'
           message: 'Project must be specified'
 
     pass:
