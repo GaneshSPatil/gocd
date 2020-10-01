@@ -12,7 +12,7 @@ mergeable:
       - do: project
         must_include:
           regex: '.+'
-          message: 'Project must be specified'
+          message: "Project must be specified"
 
     pass:
       - do: checks
