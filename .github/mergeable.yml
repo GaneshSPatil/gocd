@@ -7,13 +7,12 @@ mergeable:
           enabled: true
           message: "Milestone must be specified"
         must_include:
-          # one or more chars
           regex: '.+'
           message: "Milestone must be specified"
       - do: project
         must_include:
           regex: '.+'
-          message: 'Project must be specified'
+          message: "Project must be specified"
     pass:
       - do: checks
         status: success
