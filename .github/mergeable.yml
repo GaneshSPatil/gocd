@@ -14,15 +14,7 @@ mergeable:
         must_include:
           regex: '([0-9]+)\.([0-9]+)\.([0-9]+)'
           message: "Project must be specified in the semvar versioning format. Example: 20.8.0"
+
     pass:
       - do: checks
-        status: success
-        payload:
-          title: "Result: success"
-          summary: "Okay to merge"
-    fail:
-      - do: checks
-        status: failure
-        payload:
-          title: The PR is not ready to be merged.
-          summary: The pull request is not ready to be merged.
+        status: 'success'
