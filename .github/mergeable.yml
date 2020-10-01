@@ -2,13 +2,6 @@ version: 2
 mergeable:
   - when: pull_request.*, pull_request_review.*
     validate:
-      - do: milestone
-        no_empty:
-          enabled: true
-          message: "Milestone must be specified"
-        must_include:
-          regex: ".+"
-          message: "Milestone must be specified"
       - do: project
         must_include:
           regex: "GoCD"
