@@ -11,8 +11,8 @@ mergeable:
           message: "Milestone must be specified"
       - do: project
         must_include:
-          regex: '.+'
-          message: "Milestone must be specified"
+          regex: 'type|chore|wont'
+          message: 'Project must be specified'
 
     pass:
       - do: checks
