@@ -4,7 +4,7 @@ mergeable:
     validate:
       - do: project
         must_include:
-          regex: '.*?'
+          regex: '20\.8\.0|20\.9\.0'
           message: 'Project must be specified'
 
     pass:
