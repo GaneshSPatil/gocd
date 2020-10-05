@@ -4,7 +4,7 @@ mergeable:
     validate:
       - do: project
         must_include:
-          regex: '20.8.0|20.9.0'
+          regex: '.+'
           message: 'Project must be specified'
 
     pass:
